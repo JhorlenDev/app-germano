@@ -1,0 +1,2891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Diagnóstico de Enquadramento Tributário 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{
+    --paper:#F5F6F4; --surface:#FFFFFF; --ink:#182A32; --ink-soft:#4B5F68;
+    --petroleo:#0C4A5C; --petroleo-dark:#073038; --petroleo-tint:#E4EEF0;
+    --emerald:#0E8F62; --emerald-tint:#E4F4EC;
+    --amber:#9A5B12; --amber-tint:#FBF0DE;
+    --violet:#5B4B9E; --violet-tint:#ECE9F7;
+    --rose:#A23B3B; --rose-tint:#F8E9E9;
+    --line:#DDE3E1; --line-soft:#E9ECE9;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#101B1F; --surface:#16252A; --ink:#EAF0EF; --ink-soft:#9FB2B4;
+      --petroleo:#4FA8BE; --petroleo-dark:#8FCBDA; --petroleo-tint:#1B333B;
+      --emerald:#4FCB94; --emerald-tint:#123027; --amber:#E3AC5C; --amber-tint:#2E2413;
+      --violet:#B0A3E0; --violet-tint:#241F38; --rose:#E38080; --rose-tint:#301B1B;
+      --line:#28383C; --line-soft:#1F2E32;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#101B1F; --surface:#16252A; --ink:#EAF0EF; --ink-soft:#9FB2B4;
+    --petroleo:#4FA8BE; --petroleo-dark:#8FCBDA; --petroleo-tint:#1B333B;
+    --emerald:#4FCB94; --emerald-tint:#123027; --amber:#E3AC5C; --amber-tint:#2E2413;
+    --violet:#B0A3E0; --violet-tint:#241F38; --rose:#E38080; --rose-tint:#301B1B;
+    --line:#28383C; --line-soft:#1F2E32;
+  }
+  html{ box-sizing:border-box; scroll-padding-top:env(safe-area-inset-top,0px); }
+  *,*::before,*::after{ box-sizing:inherit; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    -webkit-font-smoothing:antialiased;
+  }
+  .font-display{ font-family:'Fraunces', Georgia, serif; }
+  .font-mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+  ::selection{ background:var(--emerald-tint); }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; }
+  input[type="text"],input[type="number"]{
+    width:100%; background:var(--surface); color:var(--ink);
+    border:1px solid var(--line); border-radius:9px; padding:9px 11px;
+    font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:14px;
+    outline:none; transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select{
+    width:100%; background:var(--surface); color:var(--ink);
+    border:1px solid var(--line); border-radius:9px; padding:9px 11px;
+    font-family:'IBM Plex Sans', sans-serif; font-size:13.5px; outline:none;
+  }
+  input[type="text"]:focus,input[type="number"]:focus,select:focus{
+    border-color:var(--petroleo); box-shadow:0 0 0 3px var(--petroleo-tint);
+  }
+  input[type="range"]{ accent-color: var(--petroleo); width:100%; }
+  label.field-label{ display:block; font-size:12.5px; color:var(--ink-soft); margin-bottom:5px; font-weight:500; }
+  button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible{ outline:2px solid var(--petroleo); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
+  .badge-glow{ box-shadow:0 0 0 1px var(--emerald), 0 8px 24px -8px rgba(14,143,98,0.35); }
+
+  .dropzone{ border:1.5px dashed var(--line); border-radius:14px; transition:border-color .15s ease, background .15s ease; }
+  .dropzone.drag-active{ border-color:var(--emerald); background:var(--emerald-tint); }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .spin{ animation:spin 0.9s linear infinite; }
+  .progress-track{ height:5px; border-radius:99px; background:var(--line-soft); overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--petroleo); transition:width .25s ease; }
+
+  @media print{
+    body *{ visibility:hidden; }
+    #parecer-print, #parecer-print *,
+    #memorial-print, #memorial-print *,
+    #ncm-print, #ncm-print * { visibility:visible; }
+    #parecer-print{ position:absolute; left:0; top:0; width:100%; margin:0; padding:0; }
+    #memorial-print{ position:absolute; left:0; top:0; width:100%; margin:0; padding:0; page:memorial; }
+    #ncm-print{ position:absolute; left:0; top:0; width:100%; margin:0; padding:0; page:ncmanexo; }
+    .no-print{ display:none !important; }
+    @page{ size:A4 portrait; margin:18mm 16mm; }
+    @page memorial{ size:A4 landscape; margin:12mm; }
+    @page ncmanexo{ size:A4 landscape; margin:12mm; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useEffect, useRef, useCallback } = React;
+
+/* ============================= ICONS (inline SVG, no external deps) ============================= */
+const Icon = ({ path, className = "w-5 h-5", strokeWidth = 1.75, style }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth}
+       strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+    {path}
+  </svg>
+);
+const IconBuilding = (p) => <Icon {...p} path={<>
+  <path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16" />
+  <path d="M15 9h4a1 1 0 0 1 1 1v11" />
+  <path d="M9 8h.01M9 12h.01M9 16h.01M12.5 8h.01M12.5 12h.01M12.5 16h.01" />
+  <path d="M2 21h20" />
+</>} />;
+const IconBriefcase = (p) => <Icon {...p} path={<>
+  <rect x="3" y="7.5" width="18" height="12" rx="1.5" />
+  <path d="M8 7.5V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.5" />
+  <path d="M3 12.5h18" />
+</>} />;
+const IconFactory = (p) => <Icon {...p} path={<>
+  <path d="M3 21V11l6 4v-4l6 4V6a1 1 0 0 1 1.5-.87L21 8v13" />
+  <path d="M3 21h18" />
+  <path d="M7 21v-4M12 21v-4M17 21v-4" />
+</>} />;
+const IconCalculator = (p) => <Icon {...p} path={<>
+  <rect x="4.5" y="2.5" width="15" height="19" rx="1.5" />
+  <path d="M8 6.5h8" />
+  <path d="M8 11h1.5M11.25 11h1.5M14.5 11h1.5M8 14.5h1.5M11.25 14.5h1.5M14.5 14.5v4M8 18h1.5" />
+</>} />;
+const IconTrendDown = (p) => <Icon {...p} path={<><path d="M3 6l7 7 4-4 7 7" /><path d="M21 9v7h-7" /></>} />;
+const IconAlert = (p) => <Icon {...p} path={<>
+  <path d="M10.6 3.5a1.6 1.6 0 0 1 2.8 0l8.3 14.8a1.6 1.6 0 0 1-1.4 2.4H3.7a1.6 1.6 0 0 1-1.4-2.4z" />
+  <path d="M12 9.5v4.2M12 16.8h.01" />
+</>} />;
+const IconFileCheck = (p) => <Icon {...p} path={<>
+  <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+  <path d="M14 3v5h5" /><path d="M9 14.5l2 2 4-4.3" />
+</>} />;
+const IconFileText = (p) => <Icon {...p} path={<>
+  <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+  <path d="M14 3v5h5" /><path d="M9 13h6M9 16.5h6M9 9.5h2" />
+</>} />;
+const IconPrinter = (p) => <Icon {...p} path={<>
+  <path d="M7 8.5V3.5h10v5" /><rect x="3.5" y="8.5" width="17" height="8" rx="1.3" /><path d="M7 15h10v6H7z" />
+</>} />;
+const IconCheckCircle = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="9" /><path d="M8.3 12.3l2.5 2.5 5-5.3" /></>} />;
+const IconX = (p) => <Icon {...p} path={<><path d="M6 6l12 12M18 6L6 18" /></>} />;
+const IconArrowRight = (p) => <Icon {...p} path={<><path d="M5 12h14M13 6l6 6-6 6" /></>} />;
+const IconInfo = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5h.01" /></>} />;
+const IconUpload = (p) => <Icon {...p} path={<>
+  <path d="M12 16V4M7.5 8.5L12 4l4.5 4.5" />
+  <path d="M4 15.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19v-3.5" />
+</>} />;
+const IconLock = (p) => <Icon {...p} path={<>
+  <rect x="5" y="10.5" width="14" height="10" rx="1.6" />
+  <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /><path d="M12 14.5v3" />
+</>} />;
+const IconLoader = (p) => <Icon {...p} path={<>
+  <path d="M12 3v3.5M12 17.5V21M5 12H1.5M22.5 12H19M6.3 6.3L4 4M20 20l-2.3-2.3M6.3 17.7L4 20M20 4l-2.3 2.3" />
+</>} />;
+const IconTrash = (p) => <Icon {...p} path={<>
+  <path d="M4.5 7h15M9.5 7V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v2M6.5 7l1 13a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-13" />
+</>} />;
+const IconSwap = (p) => <Icon {...p} path={<><path d="M7 8h12l-3.5-3.5M17 16H5l3.5 3.5" /></>} />;
+const IconSparkle = (p) => <Icon {...p} path={<>
+  <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" />
+</>} />;
+const IconTag = (p) => <Icon {...p} path={<>
+  <path d="M3 11.5V5a1 1 0 0 1 1-1h6.5a1 1 0 0 1 .7.3l8.5 8.5a1 1 0 0 1 0 1.4l-6.5 6.5a1 1 0 0 1-1.4 0L3.3 12.2a1 1 0 0 1-.3-.7z" />
+  <path d="M7.5 7.5h.01" />
+</>} />;
+const IconDatabase = (p) => <Icon {...p} path={<>
+  <ellipse cx="12" cy="5.5" rx="7.5" ry="2.8" />
+  <path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13" />
+  <path d="M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8" />
+</>} />;
+const IconRefresh = (p) => <Icon {...p} path={<>
+  <path d="M4 12a8 8 0 0 1 14-5.3L20 8M4 12a8 8 0 0 0 14 5.3L20 16" />
+  <path d="M20 4v4h-4M4 20v-4h4" />
+</>} />;
+
+/* ============================= TAX TABLES (LC 123/2006) ============================= */
+// Tabelas oficiais "Alíquotas e Partilha do Simples Nacional" (Anexos I e III, Resolução CGSN nº 94/2011,
+// fonte: normas.receita.fazenda.gov.br). percCBS = percentual de repartição de Cofins + PIS/Pasep por faixa —
+// pela regra de transição da LC 214/2025 (2027-2028), esse mesmo percentual passa a ser destinado a CBS+IBS,
+// de forma neutra em termos de arrecadação (redistribuição, não redução da carga total). É esse percentual —
+// e não um valor médio fixo — que sai do DAS quando a empresa opta pelo Simples Híbrido.
+// `partilha` reproduz o "Percentual de Repartição dos Tributos" oficial de cada faixa (fonte: Resolução CGSN
+// nº 94/2011, normas.receita.fazenda.gov.br) — é a base da "memória de cálculo" e da partilha exibida no
+// Memorial Descritivo, no mesmo formato do extrato do PGDAS-D. `percCBS` = cofins+pis (a mesma informação,
+// já somada, usada pelo motor de cálculo do Híbrido).
+const ANEXO_I = [
+  { min: 0,          max: 180000,   aliq: 0.0400, pd: 0,       percCBS: 15.50, partilha: { irpj: 5.50, csll: 3.50, cofins: 12.74, pis: 2.76, cpp: 41.50, icmsOuIss: 34.00, labelIcmsIss: 'ICMS' } },
+  { min: 180000.01,  max: 360000,   aliq: 0.0730, pd: 5940,    percCBS: 15.50, partilha: { irpj: 5.50, csll: 3.50, cofins: 12.74, pis: 2.76, cpp: 41.50, icmsOuIss: 34.00, labelIcmsIss: 'ICMS' } },
+  { min: 360000.01,  max: 720000,   aliq: 0.0950, pd: 13860,   percCBS: 15.50, partilha: { irpj: 5.50, csll: 3.50, cofins: 12.74, pis: 2.76, cpp: 42.00, icmsOuIss: 33.50, labelIcmsIss: 'ICMS' } },
+  { min: 720000.01,  max: 1800000,  aliq: 0.1070, pd: 22500,   percCBS: 15.50, partilha: { irpj: 5.50, csll: 3.50, cofins: 12.74, pis: 2.76, cpp: 42.00, icmsOuIss: 33.50, labelIcmsIss: 'ICMS' } },
+  { min: 1800000.01, max: 3600000,  aliq: 0.1430, pd: 87300,   percCBS: 15.50, partilha: { irpj: 5.50, csll: 3.50, cofins: 12.74, pis: 2.76, cpp: 42.00, icmsOuIss: 33.50, labelIcmsIss: 'ICMS' } },
+  { min: 3600000.01, max: 4800000,  aliq: 0.1900, pd: 378000,  percCBS: 34.40, partilha: { irpj: 13.50, csll: 10.00, cofins: 28.27, pis: 6.13, cpp: 42.10, icmsOuIss: 0, labelIcmsIss: 'ICMS (fórmula específica da 6ª faixa)' } },
+];
+const ANEXO_III = [
+  { min: 0,          max: 180000,   aliq: 0.0600, pd: 0,       percCBS: 15.60, partilha: { irpj: 4.00, csll: 3.50, cofins: 12.82, pis: 2.78, cpp: 43.40, icmsOuIss: 33.50, labelIcmsIss: 'ISS' } },
+  { min: 180000.01,  max: 360000,   aliq: 0.1120, pd: 9360,    percCBS: 17.10, partilha: { irpj: 4.00, csll: 3.50, cofins: 14.05, pis: 3.05, cpp: 43.40, icmsOuIss: 32.00, labelIcmsIss: 'ISS' } },
+  { min: 360000.01,  max: 720000,   aliq: 0.1350, pd: 17640,   percCBS: 16.60, partilha: { irpj: 4.00, csll: 3.50, cofins: 13.64, pis: 2.96, cpp: 43.40, icmsOuIss: 32.50, labelIcmsIss: 'ISS' } },
+  { min: 720000.01,  max: 1800000,  aliq: 0.1600, pd: 35640,   percCBS: 16.60, partilha: { irpj: 4.00, csll: 3.50, cofins: 13.64, pis: 2.96, cpp: 43.40, icmsOuIss: 32.50, labelIcmsIss: 'ISS' } },
+  { min: 1800000.01, max: 3600000,  aliq: 0.2100, pd: 125640,  percCBS: 15.60, partilha: { irpj: 4.00, csll: 3.50, cofins: 12.82, pis: 2.78, cpp: 43.40, icmsOuIss: 33.50, labelIcmsIss: 'ISS' } },
+  { min: 3600000.01, max: 4800000,  aliq: 0.3300, pd: 648000,  percCBS: 19.50, partilha: { irpj: 35.00, csll: 15.00, cofins: 16.03, pis: 3.47, cpp: 30.50, icmsOuIss: 0, labelIcmsIss: 'ISS (fórmula específica da 6ª faixa)' } },
+];
+// Anexo IV (LC 123/2006) — lista fechada de atividades do inciso IV do art. 18 (construção civil, obras de
+// engenharia, vigilância, limpeza e conservação, advocacia). A CPP patronal NÃO integra o DAS neste anexo — é
+// recolhida à parte, à alíquota de 20% sobre folha + pró-labore (sem RAT nem contribuições a terceiros —
+// art. 13, inciso VI e art. 18, §5º-C da LC 123/2006; confirmado em Solução de Consulta COSIT).
+const ANEXO_IV = [
+  { min: 0,          max: 180000,   aliq: 0.0450, pd: 0,       percCBS: 21.50, partilha: { irpj: 18.80, csll: 15.20, cofins: 17.67, pis: 3.83, cpp: 0, icmsOuIss: 44.50, labelIcmsIss: 'ISS' } },
+  { min: 180000.01,  max: 360000,   aliq: 0.0900, pd: 8100,    percCBS: 25.00, partilha: { irpj: 19.80, csll: 15.20, cofins: 20.55, pis: 4.45, cpp: 0, icmsOuIss: 40.00, labelIcmsIss: 'ISS' } },
+  { min: 360000.01,  max: 720000,   aliq: 0.1020, pd: 12420,   percCBS: 24.00, partilha: { irpj: 20.80, csll: 15.20, cofins: 19.73, pis: 4.27, cpp: 0, icmsOuIss: 40.00, labelIcmsIss: 'ISS' } },
+  { min: 720000.01,  max: 1800000,  aliq: 0.1400, pd: 39780,   percCBS: 23.00, partilha: { irpj: 17.80, csll: 19.20, cofins: 18.90, pis: 4.10, cpp: 0, icmsOuIss: 40.00, labelIcmsIss: 'ISS' } },
+  { min: 1800000.01, max: 3600000,  aliq: 0.2200, pd: 183780,  percCBS: 22.00, partilha: { irpj: 18.80, csll: 19.20, cofins: 18.08, pis: 3.92, cpp: 0, icmsOuIss: 40.00, labelIcmsIss: 'ISS' } },
+  { min: 3600000.01, max: 4800000,  aliq: 0.3300, pd: 828000,  percCBS: 25.00, partilha: { irpj: 53.50, csll: 21.50, cofins: 20.55, pis: 4.45, cpp: 0, icmsOuIss: 0, labelIcmsIss: 'ISS (fórmula específica da 6ª faixa)' } },
+];
+// Anexo V (LC 123/2006) — serviços do inciso V do art. 18 quando o Fator R < 28%. Diferentemente do que se
+// costuma supor, a CPP patronal AQUI ESTÁ EMBUTIDA NO DAS (igual aos Anexos I, II e III) — só o Anexo IV tem
+// CPP fora do DAS. Confirmado pelo art. 13, inciso VI, da LC 123/2006 ("Anexos I, II, III e V estão dispensados
+// da contribuição previdenciária patronal do art. 22, incisos I e III, da Lei 8.212/91") e pela tabela oficial
+// da Resolução CGSN nº 94/2011 (Anexo V, vigência 01/01/2018), que já lista uma coluna própria de CPP.
+const ANEXO_V = [
+  { min: 0,          max: 180000,   aliq: 0.1550, pd: 0,       percCBS: 17.15, partilha: { irpj: 25.00, csll: 15.00, cofins: 14.10, pis: 3.05, cpp: 28.85, icmsOuIss: 14.00, labelIcmsIss: 'ISS' } },
+  { min: 180000.01,  max: 360000,   aliq: 0.1800, pd: 4500,    percCBS: 17.15, partilha: { irpj: 23.00, csll: 15.00, cofins: 14.10, pis: 3.05, cpp: 27.85, icmsOuIss: 17.00, labelIcmsIss: 'ISS' } },
+  { min: 360000.01,  max: 720000,   aliq: 0.1950, pd: 9900,    percCBS: 18.15, partilha: { irpj: 24.00, csll: 15.00, cofins: 14.92, pis: 3.23, cpp: 23.85, icmsOuIss: 19.00, labelIcmsIss: 'ISS' } },
+  { min: 720000.01,  max: 1800000,  aliq: 0.2050, pd: 17100,   percCBS: 19.15, partilha: { irpj: 21.00, csll: 15.00, cofins: 15.74, pis: 3.41, cpp: 23.85, icmsOuIss: 21.00, labelIcmsIss: 'ISS' } },
+  { min: 1800000.01, max: 3600000,  aliq: 0.2300, pd: 62100,   percCBS: 17.15, partilha: { irpj: 23.00, csll: 12.50, cofins: 14.10, pis: 3.05, cpp: 23.85, icmsOuIss: 23.50, labelIcmsIss: 'ISS' } },
+  { min: 3600000.01, max: 4800000,  aliq: 0.3050, pd: 540000,  percCBS: 20.00, partilha: { irpj: 35.00, csll: 15.50, cofins: 16.44, pis: 3.56, cpp: 29.50, icmsOuIss: 0, labelIcmsIss: 'ISS (fórmula específica da 6ª faixa)' } },
+];
+// Anexo II (LC 123/2006) — Indústria. Inclui IPI na partilha (permanece embutido na alíquota nominal do DAS,
+// inalterado pela reforma — a dedução do Híbrido remove apenas a parcela de Cofins+PIS/Pasep, que passa a CBS/IBS).
+const ANEXO_II = [
+  { min: 0,          max: 180000,   aliq: 0.0450, pd: 0,       percCBS: 14.00, partilha: { irpj: 5.50, csll: 3.50, cofins: 11.51, pis: 2.49, cpp: 37.50, ipi: 7.50, icmsOuIss: 32.00, labelIcmsIss: 'ICMS' } },
+  { min: 180000.01,  max: 360000,   aliq: 0.0780, pd: 5940,    percCBS: 14.00, partilha: { irpj: 5.50, csll: 3.50, cofins: 11.51, pis: 2.49, cpp: 37.50, ipi: 7.50, icmsOuIss: 32.00, labelIcmsIss: 'ICMS' } },
+  { min: 360000.01,  max: 720000,   aliq: 0.1000, pd: 13860,   percCBS: 14.00, partilha: { irpj: 5.50, csll: 3.50, cofins: 11.51, pis: 2.49, cpp: 37.50, ipi: 7.50, icmsOuIss: 32.00, labelIcmsIss: 'ICMS' } },
+  { min: 720000.01,  max: 1800000,  aliq: 0.1120, pd: 22500,   percCBS: 14.00, partilha: { irpj: 5.50, csll: 3.50, cofins: 11.51, pis: 2.49, cpp: 37.50, ipi: 7.50, icmsOuIss: 32.00, labelIcmsIss: 'ICMS' } },
+  { min: 1800000.01, max: 3600000,  aliq: 0.1470, pd: 85500,   percCBS: 14.00, partilha: { irpj: 5.50, csll: 3.50, cofins: 11.51, pis: 2.49, cpp: 37.50, ipi: 7.50, icmsOuIss: 32.00, labelIcmsIss: 'ICMS' } },
+  { min: 3600000.01, max: 4800000,  aliq: 0.3000, pd: 720000,  percCBS: 25.50, partilha: { irpj: 8.50, csll: 7.50, cofins: 20.96, pis: 4.54, cpp: 23.50, ipi: 35.00, icmsOuIss: 0, labelIcmsIss: 'ICMS (fórmula específica da 6ª faixa)' } },
+];
+const FATOR_R_LIMITE = 0.28;
+const LIMITE_SIMPLES = 4800000;
+const CBS_ALIQ = 0.088; // alíquota de referência projetada para 2027 (TCU/Senado, LC 214/2025 arts. 18-20 e 349) — ainda sujeita a fixação definitiva por Resolução do Senado, prevista até 15/12 do ano anterior ao início de vigência.
+const PRESUNCAO_IRPJ = { comercio: 0.08, industria: 0.08, servicos: 0.32 };
+const PRESUNCAO_CSLL = { comercio: 0.12, industria: 0.12, servicos: 0.32 };
+// CPP patronal: 20% + RAT (1-3%, ajustado pelo FAP) + contribuições a terceiros (Sistema S, INCRA etc.) incide
+// sobre a folha de EMPREGADOS — a soma costuma ser usada como referência de 28,8%. Sobre o PRÓ-LABORE do sócio
+// (contribuinte individual), incide apenas o INSS patronal de 20%, sem RAT e sem terceiros (art. 22, III, da
+// Lei nº 8.212/1991). No Simples Nacional Anexo IV, quando a CPP é recolhida fora do DAS, aplica-se uma
+// alíquota única de 20% tanto sobre a folha quanto sobre o pró-labore (sem RAT/terceiros — regra própria do
+// Anexo IV, distinta da CPP "normal" do Lucro Presumido/Real).
+const CPP_FOLHA_ALIQ = 0.288;
+const CPP_PROLABORE_ALIQ = 0.20;
+const CPP_ANEXO_IV_ALIQ = 0.20;
+
+// Fator R = folha de pagamento (12 meses, incl. pró-labore) / RBT12. Usa-se a folha mensal informada x 12 como
+// proxy da folha anualizada. Fator R >= 28% -> Anexo III (CPP no DAS); < 28% -> Anexo V (CPP à parte).
+function calcFatorR(d) {
+  const folha12 = (d.folhaMensal + d.proLabore) * 12;
+  const base = Math.max(d.rbt12, 1);
+  return Math.min(1, folha12 / base);
+}
+// `forcado` (III/IV/V) vem de detecção no PGDAS-D ou de escolha manual; sem ele, decide pelo Fator R.
+function tabelaServicos(fatorR, forcado) {
+  if (forcado === 'III') return { tabela: ANEXO_III, nome: 'III', cppNoDAS: true };
+  if (forcado === 'IV') return { tabela: ANEXO_IV, nome: 'IV', cppNoDAS: false };
+  if (forcado === 'V') return { tabela: ANEXO_V, nome: 'V', cppNoDAS: true };
+  return fatorR >= FATOR_R_LIMITE ? { tabela: ANEXO_III, nome: 'III', cppNoDAS: true } : { tabela: ANEXO_V, nome: 'V', cppNoDAS: true };
+}
+
+const fmtBRL = (v) => (isFinite(v) ? v : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+const fmtBRL2 = (v) => (isFinite(v) ? v : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 2 });
+const fmtPct = (v) => (isFinite(v) ? v * 100 : 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+const fmtBytes = (b) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
+
+function faixaSimples(rbt12, tabela) {
+  const excede = rbt12 > LIMITE_SIMPLES;
+  const base = Math.min(Math.max(rbt12, 0.01), LIMITE_SIMPLES);
+  const faixa = tabela.find(f => base >= f.min && base <= f.max) || tabela[tabela.length - 1];
+  const aliqEfetiva = Math.max(0, (base * faixa.aliq - faixa.pd) / base);
+  return { faixa, aliqEfetiva, excede };
+}
+
+/* ============================= MOTOR DE BENEFÍCIOS — LC 214/2025 (arts. e Anexos I-III / art. 127) ============================= */
+// Classificação por NCM (comércio) — tabela ilustrativa e não exaustiva, baseada nos capítulos/posições
+// mais comuns da Cesta Básica Nacional, medicamentos, dispositivos médicos e insumos agropecuários.
+// Deve ser conferida pelo contador antes da formalização do enquadramento.
+const CESTA_BASICA_NCM4 = new Set([
+  '1006','0713','1101','1102','0401','0402','0403','0405','0406',
+  '0201','0202','0203','0204','0207','0210','1701','1507','1508','1512','1514','1515','1517',
+  '0901','0407','1905','0701','0702','0703','0704','0706','0708','0709','0710','0714',
+  '0803','0804','0805','0806','0807','0808','0809','0810',
+]);
+const MEDICAMENTOS_NCM2 = new Set(['30']);
+const DISPOSITIVOS_MEDICOS_NCM4 = new Set(['9018','9019','9020','9021','9022']);
+const INSUMOS_AGRO_NCM4 = new Set(['3101','3102','3103','3104','3105','3808','1209','2309']);
+
+function classifyNCM(ncmRaw) {
+  if (!ncmRaw) return 'padrao';
+  const ncm = String(ncmRaw).replace(/\D/g, '');
+  if (ncm.length < 4) return 'padrao';
+  const n4 = ncm.slice(0, 4), n2 = ncm.slice(0, 2);
+  if (CESTA_BASICA_NCM4.has(n4)) return 'cesta';
+  if (MEDICAMENTOS_NCM2.has(n2) || DISPOSITIVOS_MEDICOS_NCM4.has(n4) || INSUMOS_AGRO_NCM4.has(n4)) return 'reduzido60';
+  return 'padrao';
+}
+
+// Motor de sugestão de NCM a partir da descrição do item (xProd do XML) — dicionário de palavras-chave
+// ilustrativo, focado em ferragens/material de construção e peças de motocicleta (ramos comuns na carteira
+// do escritório). NÃO é uma consulta oficial de classificação fiscal — serve apenas para apontar, de forma
+// grosseira, quando a descrição do produto claramente não combina com a categoria de benefício atribuída ao
+// NCM informado no XML (ex.: NCM de feijão com descrição "prego").
+const PALAVRAS_NCM_SUGESTAO = [
+  { termos: ['prego'], ncm: '7317.00.90', desc: 'Pregos, tachas, percevejos de ferro/aço' },
+  { termos: ['parafuso'], ncm: '7318.15.00', desc: 'Parafusos de ferro/aço' },
+  { termos: ['porca'], ncm: '7318.16.00', desc: 'Porcas de ferro/aço' },
+  { termos: ['arruela'], ncm: '7318.21.00', desc: 'Arruelas de ferro/aço' },
+  { termos: ['cimento'], ncm: '2523.29.10', desc: 'Cimento Portland' },
+  { termos: ['tinta', 'esmalte sintet'], ncm: '3208 / 3209', desc: 'Tintas e vernizes' },
+  { termos: ['areia'], ncm: '2505.10.00', desc: 'Areias' },
+  { termos: ['tijolo'], ncm: '6904', desc: 'Tijolos de construção' },
+  { termos: ['telha'], ncm: '6811 / 6905', desc: 'Telhas' },
+  { termos: ['cano', 'tubo pvc', 'tubo de pvc'], ncm: '3917', desc: 'Tubos de plástico (PVC)' },
+  { termos: ['conexao', 'conexão', 'joelho pvc', 'te pvc', 'tê pvc'], ncm: '3917.40', desc: 'Acessórios de tubos de plástico' },
+  { termos: ['fio eletrico', 'fio elétrico', 'cabo eletrico', 'cabo elétrico'], ncm: '8544', desc: 'Fios e cabos elétricos isolados' },
+  { termos: ['disjuntor'], ncm: '8536.20', desc: 'Disjuntores' },
+  { termos: ['lampada', 'lâmpada'], ncm: '8539 / 8543', desc: 'Lâmpadas' },
+  { termos: ['fita isolante', 'fita veda'], ncm: '3919 / 3926', desc: 'Fitas adesivas/plásticas' },
+  { termos: ['martelo'], ncm: '8205.20', desc: 'Martelos e marretas' },
+  { termos: ['chave de fenda', 'chave fenda', 'chave philips'], ncm: '8205.40', desc: 'Chaves de fenda' },
+  { termos: ['trena'], ncm: '9017.80', desc: 'Instrumentos de medida' },
+  { termos: ['pastilha de freio', 'pastilha freio'], ncm: '8714.10', desc: 'Partes e acessórios de motocicletas (freios)' },
+  { termos: ['pneu moto', 'pneu de moto', 'pneu motocicleta'], ncm: '4011.40', desc: 'Pneus novos para motocicletas' },
+  { termos: ['camara de ar', 'câmara de ar'], ncm: '4013.90', desc: 'Câmaras de ar' },
+  { termos: ['vela de ignicao', 'vela de ignição', 'vela ignicao'], ncm: '8511.10', desc: 'Velas de ignição' },
+  { termos: ['oleo lubrificante', 'óleo lubrificante', 'oleo motor', 'óleo motor', 'oleo 2 tempos'], ncm: '2710.19', desc: 'Óleos lubrificantes' },
+  { termos: ['filtro de oleo', 'filtro óleo', 'filtro de ar'], ncm: '8421.23 / 8421.31', desc: 'Filtros de óleo/ar' },
+  { termos: ['corrente de transmissao', 'corrente transmissão', 'corrente moto'], ncm: '7315.11', desc: 'Correntes de rolos (transmissão)' },
+  { termos: ['amortecedor'], ncm: '8714.10', desc: 'Partes e acessórios de motocicletas (suspensão)' },
+  { termos: ['capacete'], ncm: '6506.10', desc: 'Capacetes de proteção' },
+  { termos: ['retrovisor'], ncm: '7009 / 8714.10', desc: 'Espelhos retrovisores' },
+  { termos: ['farol', 'lanterna traseira', 'lanterna de moto'], ncm: '8512.20', desc: 'Aparelhos de iluminação para veículos' },
+  { termos: ['bateria de moto', 'bateria moto'], ncm: '8507', desc: 'Acumuladores elétricos (baterias)' },
+];
+function sugerirNCM(descricao) {
+  if (!descricao) return null;
+  const desc = descricao.toLowerCase();
+  for (const entry of PALAVRAS_NCM_SUGESTAO) {
+    if (entry.termos.some(t => desc.includes(t))) return entry;
+  }
+  return null;
+}
+
+// Classificação por CNAE (serviços) — art. 127 da LC 214/2025 (profissões regulamentadas) e serviços de
+// saúde/educação — tabela ilustrativa com CNAEs representativos; sujeita a conferência do contador.
+const CNAE_REGULAMENTADA4 = new Set(['6911', '6912', '6920', '7111', '7112', '8630']);
+const CNAE_SAUDE_EDUCACAO4 = new Set(['8610', '8640', '8650', '8511', '8512', '8513', '8520', '8531', '8532', '8533', '8541', '8542', '8591', '8592', '8593', '8599']);
+
+function classifyCNAE(cnaeRaw) {
+  if (!cnaeRaw) return 'padrao';
+  const digits = String(cnaeRaw).replace(/\D/g, '');
+  const n4 = digits.slice(0, 4);
+  if (CNAE_REGULAMENTADA4.has(n4)) return 'regulamentada';
+  if (CNAE_SAUDE_EDUCACAO4.has(n4)) return 'saude_educacao';
+  return 'padrao';
+}
+
+const MESES_ABREV = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+function formatCompetencia(c) {
+  if (!c) return null;
+  const m = /^(\d{4})-(\d{2})$/.exec(c);
+  if (!m) return c;
+  const idx = parseInt(m[2], 10) - 1;
+  return `${MESES_ABREV[idx] || m[2]}/${m[1]}`;
+}
+
+function aliqCBSComercio(beneficios) {
+  const cesta = Math.max(0, beneficios.cestaPct || 0);
+  const red60 = Math.max(0, beneficios.reduzido60Pct || 0);
+  const padrao = Math.max(0, 100 - cesta - red60);
+  const excedeSoma = cesta + red60 > 100;
+  const aliq = (cesta * 0 + red60 * (CBS_ALIQ * 0.40) + padrao * CBS_ALIQ) / 100;
+  return { cesta, red60, padrao, excedeSoma, aliq };
+}
+function aliqCBSServicos(beneficios) {
+  let aliq = CBS_ALIQ, label = 'Padrão (alíquota de referência, sem redução)';
+  if (beneficios.categoria === 'regulamentada') { aliq = CBS_ALIQ * 0.70; label = 'Profissão regulamentada — art. 127 LC 214/2025 (redução de 30%)'; }
+  else if (beneficios.categoria === 'saude_educacao') { aliq = CBS_ALIQ * 0.40; label = 'Serviços de saúde ou educação (redução de 60%)'; }
+  else if (beneficios.categoria === 'personalizado') { aliq = (beneficios.aliqPersonalizada || 8.8) / 100; label = 'Alíquota personalizada (ajuste manual)'; }
+  return { aliq, label };
+}
+
+/* ============================= CORE TAX ENGINE ============================= */
+function computeRegimes(d) {
+  const setor = d.setor;
+  const fatorR = setor === 'servicos' ? calcFatorR(d) : null;
+  const infoAnexoServicos = setor === 'servicos' ? tabelaServicos(fatorR, d.anexoServicosForcado) : null;
+  const tabela = setor === 'comercio' ? ANEXO_I : setor === 'industria' ? ANEXO_II : infoAnexoServicos.tabela;
+  const nomeAnexo = setor === 'comercio' ? 'I' : setor === 'industria' ? 'II' : infoAnexoServicos.nome;
+  const cppNoDAS = setor === 'servicos' ? infoAnexoServicos.cppNoDAS : true;
+  const { faixa, aliqEfetiva, excede } = faixaSimples(d.rbt12, tabela);
+
+  const dasTradicionalTabela = d.faturamentoMensal * aliqEfetiva;
+  const cppSeparado = cppNoDAS ? 0 : CPP_ANEXO_IV_ALIQ * (d.folhaMensal + d.proLabore);
+  const dasTradicional = dasTradicionalTabela + cppSeparado;
+
+  const reducaoPct = faixa.percCBS / 100;
+  const dasHibridoBase = dasTradicionalTabela * (1 - reducaoPct);
+
+  const aliqCBSVendas = setor === 'servicos' ? aliqCBSServicos(d.beneficios.servicos).aliq : aliqCBSComercio(d.beneficios.comercio).aliq;
+  const cbsDebito = d.faturamentoMensal * aliqCBSVendas;
+  const cbsCreditoBase = d.comprasMensais * (d.pctFornecedorRegimeNormal / 100);
+  const cbsCredito = cbsCreditoBase * CBS_ALIQ;
+  const cbsLiquidoHibrido = Math.max(0, cbsDebito - cbsCredito);
+  const totalHibrido = dasHibridoBase + cbsLiquidoHibrido + cppSeparado;
+
+  const baseIRPJ = PRESUNCAO_IRPJ[setor] * d.faturamentoMensal;
+  const irpj = baseIRPJ * 0.15 + Math.max(0, baseIRPJ - 20000) * 0.10;
+  const baseCSLL = PRESUNCAO_CSLL[setor] * d.faturamentoMensal;
+  const csll = baseCSLL * 0.09;
+  const cpp = CPP_FOLHA_ALIQ * d.folhaMensal + CPP_PROLABORE_ALIQ * d.proLabore;
+  const cbsLiquidoPresumido = Math.max(0, cbsDebito - cbsCredito);
+  let icmsLiquido = 0, iss = 0;
+  if (setor !== 'servicos') {
+    const icmsDebito = (d.aliquotaEstMun / 100) * d.faturamentoMensal;
+    const icmsCredito = (d.aliquotaEstMun / 100) * d.comprasMensais;
+    icmsLiquido = Math.max(0, icmsDebito - icmsCredito);
+  } else {
+    iss = (d.aliquotaEstMun / 100) * d.faturamentoMensal;
+  }
+  const totalPresumido = irpj + csll + cpp + icmsLiquido + iss + cbsLiquidoPresumido;
+
+  const cbsLinhaLabel = `CBS a recolher (débito ${fmtPct(aliqCBSVendas)} − crédito ${fmtPct(CBS_ALIQ)})`;
+  const cppSeparadaLabel = 'CPP patronal (20% s/ folha + pró-labore — Anexo IV, recolhida à parte, fora do DAS)';
+  const irpjLabel = setor === 'servicos' ? 'IRPJ (base 32% + adicional)' : 'IRPJ (base 8% + adicional)';
+  const csllLabel = setor === 'servicos' ? 'CSLL (base 32%)' : 'CSLL (base 12%)';
+
+  const regimes = {
+    tradicional: {
+      label: 'Simples Nacional Tradicional', mensal: dasTradicional,
+      linhas: [
+        { label: `DAS integral (Anexo ${nomeAnexo} · alíq. efetiva ${fmtPct(aliqEfetiva)})`, valor: dasTradicionalTabela, grupo: 'unificado' },
+        ...(cppNoDAS ? [] : [{ label: cppSeparadaLabel, valor: cppSeparado, grupo: 'previdenciario' }]),
+      ],
+    },
+    hibrido: {
+      label: 'Simples Nacional Híbrido', mensal: totalHibrido,
+      linhas: [
+        { label: `DAS reduzido (−${(reducaoPct * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}% · parcela de Cofins/PIS→CBS/IBS da faixa, Anexo ${nomeAnexo})`, valor: dasHibridoBase, grupo: 'unificado' },
+        { label: cbsLinhaLabel, valor: cbsLiquidoHibrido, grupo: 'federal' },
+        ...(cppNoDAS ? [] : [{ label: cppSeparadaLabel, valor: cppSeparado, grupo: 'previdenciario' }]),
+      ],
+    },
+    presumido: {
+      label: 'Lucro Presumido', mensal: totalPresumido,
+      linhas: setor !== 'servicos' ? [
+        { label: irpjLabel, valor: irpj, grupo: 'federal' },
+        { label: csllLabel, valor: csll, grupo: 'federal' },
+        { label: cbsLinhaLabel, valor: cbsLiquidoPresumido, grupo: 'federal' },
+        { label: `ICMS a recolher (débito − crédito, ${d.aliquotaEstMun}%)`, valor: icmsLiquido, grupo: 'estadual' },
+        { label: 'CPP patronal (28,8% s/ folha + 20% s/ pró-labore)', valor: cpp, grupo: 'previdenciario' },
+      ] : [
+        { label: irpjLabel, valor: irpj, grupo: 'federal' },
+        { label: csllLabel, valor: csll, grupo: 'federal' },
+        { label: cbsLinhaLabel, valor: cbsLiquidoPresumido, grupo: 'federal' },
+        { label: `ISS municipal (${d.aliquotaEstMun}%, cumulativo)`, valor: iss, grupo: 'municipal' },
+        { label: 'CPP patronal (28,8% s/ folha + 20% s/ pró-labore)', valor: cpp, grupo: 'previdenciario' },
+      ],
+    },
+  };
+
+  const keys = ['tradicional', 'hibrido', 'presumido'];
+  let melhor = keys[0];
+  keys.forEach(k => { if (regimes[k].mensal < regimes[melhor].mensal) melhor = k; });
+  keys.forEach(k => { regimes[k].anual = regimes[k].mensal * 12; regimes[k].cargaEfetiva = d.faturamentoMensal > 0 ? regimes[k].mensal / d.faturamentoMensal : 0; });
+
+  return { regimes, melhor, excede, aliqEfetiva, faixa, cbsDebito, cbsCredito, aliqCBSVendas, fatorR, nomeAnexo, cppNoDAS };
+}
+
+// Calcula os 3 regimes para um único mês do demonstrativo cronológico, usando o RBT12 e os benefícios
+// fiscais atualmente configurados no simulador (a alíquota efetiva do Simples e a alíquota de CBS
+// ponderada não variam mês a mês nesta amostra — apenas faturamento, compras e folha).
+function computeMesRegimes(d, mes) {
+  const setor = d.setor;
+  const fatorR = setor === 'servicos' ? calcFatorR(d) : null;
+  const infoAnexoServicos = setor === 'servicos' ? tabelaServicos(fatorR, d.anexoServicosForcado) : null;
+  const tabela = setor === 'comercio' ? ANEXO_I : setor === 'industria' ? ANEXO_II : infoAnexoServicos.tabela;
+  const cppNoDAS = setor === 'servicos' ? infoAnexoServicos.cppNoDAS : true;
+  const { faixa, aliqEfetiva } = faixaSimples(d.rbt12, tabela);
+  const dasTradTabela = mes.faturamento * aliqEfetiva;
+  const cppSeparado = cppNoDAS ? 0 : CPP_ANEXO_IV_ALIQ * mes.folha;
+  const dasTrad = dasTradTabela + cppSeparado;
+
+  const reducaoPct = faixa.percCBS / 100;
+  const dasHibridoBase = dasTradTabela * (1 - reducaoPct);
+  const aliqCBSVendas = setor === 'servicos' ? aliqCBSServicos(d.beneficios.servicos).aliq : aliqCBSComercio(d.beneficios.comercio).aliq;
+  const cbsDebito = mes.faturamento * aliqCBSVendas;
+  const cbsCredito = mes.comprasRegimeNormal * CBS_ALIQ;
+  const cbsLiquido = Math.max(0, cbsDebito - cbsCredito);
+  const totalHibrido = dasHibridoBase + cbsLiquido + cppSeparado;
+
+  const baseIRPJ = PRESUNCAO_IRPJ[setor] * mes.faturamento;
+  const irpj = baseIRPJ * 0.15 + Math.max(0, baseIRPJ - 20000) * 0.10;
+  const baseCSLL = PRESUNCAO_CSLL[setor] * mes.faturamento;
+  const csll = baseCSLL * 0.09;
+  // O demonstrativo de 6 meses guarda "folha" como um único valor mensal (folha de funcionários + pró-labore
+  // somados), sem separar as duas parcelas como no simulador principal — por isso aplica-se aqui a alíquota
+  // cheia (28,8%) sobre o total, o que pode SUPERESTIMAR levemente a CPP quando há pró-labore relevante no mês
+  // (que teria direito à alíquota menor de 20%, sem RAT/terceiros). Para o valor exato, ver o Memorial de
+  // Cálculo, que usa os campos separados de folha e pró-labore do mês-base.
+  const cpp = CPP_FOLHA_ALIQ * mes.folha;
+  let icmsLiquido = 0, iss = 0;
+  if (setor !== 'servicos') {
+    const icmsDebito = (d.aliquotaEstMun / 100) * mes.faturamento;
+    const icmsCredito = (d.aliquotaEstMun / 100) * mes.comprasRegimeNormal;
+    icmsLiquido = Math.max(0, icmsDebito - icmsCredito);
+  } else {
+    iss = (d.aliquotaEstMun / 100) * mes.faturamento;
+  }
+  const totalPresumido = irpj + csll + cpp + icmsLiquido + iss + cbsLiquido;
+
+  const valores = { tradicional: dasTrad, hibrido: totalHibrido, presumido: totalPresumido };
+  const keys = ['tradicional', 'hibrido', 'presumido'];
+  let melhor = keys[0], pior = keys[0];
+  keys.forEach(k => { if (valores[k] < valores[melhor]) melhor = k; if (valores[k] > valores[pior]) pior = k; });
+  const economia = valores[pior] - valores[melhor];
+  const efetivas = {
+    tradicional: mes.faturamento > 0 ? dasTrad / mes.faturamento : 0,
+    hibrido: mes.faturamento > 0 ? totalHibrido / mes.faturamento : 0,
+    presumido: mes.faturamento > 0 ? totalPresumido / mes.faturamento : 0,
+  };
+  return { ...valores, melhor, pior, economia, efetivas, aliqEfetiva, nomeAnexo: setor === 'comercio' ? 'I' : setor === 'industria' ? 'II' : infoAnexoServicos.nome, cppNoDAS, faixa };
+}
+
+/* ============================= EXEMPLOS ============================= */
+const EXEMPLO_COMERCIO = {
+  setor: 'comercio', razaoSocial: 'Amazônia Distribuidora de Alimentos Ltda', cnpj: '07.654.321/0001-90',
+  faturamentoMensal: 180000, rbt12: 1950000, comprasMensais: 110000,
+  pctFornecedorRegimeNormal: 55, folhaMensal: 16000, proLabore: 6000,
+  aliquotaEstMun: 20, pctB2B: 25,
+  municipioUF: 'Tefé - AM', uf: 'AM', cnpjMestreLocked: true,
+  anexoServicosForcado: null, anexoDetectadoPGDAS: null, ncmDetalhado: [],
+  beneficios: { comercio: { cestaPct: 22, reduzido60Pct: 12 }, servicos: { cnae: '', categoria: 'padrao', aliqPersonalizada: 8.8 } },
+  historico: [
+    { faturamento: 165000, comprasRegimeNormal: 55000, folha: 21000 },
+    { faturamento: 172000, comprasRegimeNormal: 58000, folha: 21500 },
+    { faturamento: 178000, comprasRegimeNormal: 60000, folha: 22000 },
+    { faturamento: 183000, comprasRegimeNormal: 62000, folha: 22000 },
+    { faturamento: 190000, comprasRegimeNormal: 65000, folha: 22500 },
+    { faturamento: 196000, comprasRegimeNormal: 68000, folha: 23000 },
+  ],
+  historicoCompetencias: ['2027-01', '2027-02', '2027-03', '2027-04', '2027-05', '2027-06'],
+};
+const EXEMPLO_INDUSTRIA = {
+  setor: 'industria', razaoSocial: 'Amazônia Componentes Eletrônicos Ltda', cnpj: '09.871.234/0001-55',
+  faturamentoMensal: 320000, rbt12: 3200000, comprasMensais: 190000,
+  pctFornecedorRegimeNormal: 65, folhaMensal: 45000, proLabore: 10000,
+  aliquotaEstMun: 20, pctB2B: 85,
+  municipioUF: 'Manaus - AM', uf: 'AM', cnpjMestreLocked: true,
+  anexoServicosForcado: null, anexoDetectadoPGDAS: null, ncmDetalhado: [],
+  beneficios: { comercio: { cestaPct: 5, reduzido60Pct: 8 }, servicos: { cnae: '', categoria: 'padrao', aliqPersonalizada: 8.8 } },
+  historico: [
+    { faturamento: 288000, comprasRegimeNormal: 170000, folha: 43000 },
+    { faturamento: 298000, comprasRegimeNormal: 176000, folha: 43500 },
+    { faturamento: 308000, comprasRegimeNormal: 182000, folha: 44500 },
+    { faturamento: 318000, comprasRegimeNormal: 188000, folha: 45000 },
+    { faturamento: 330000, comprasRegimeNormal: 196000, folha: 46000 },
+    { faturamento: 345000, comprasRegimeNormal: 204000, folha: 47000 },
+  ],
+  historicoCompetencias: ['2027-01', '2027-02', '2027-03', '2027-04', '2027-05', '2027-06'],
+};
+const EXEMPLO_SERVICOS = {
+  setor: 'servicos', razaoSocial: 'Cunha & Miranda Serviços Técnicos Ltda', cnpj: '13.938.626/0001-29',
+  faturamentoMensal: 95000, rbt12: 980000, comprasMensais: 22000,
+  pctFornecedorRegimeNormal: 40, folhaMensal: 28000, proLabore: 8000,
+  aliquotaEstMun: 3, pctB2B: 70,
+  municipioUF: 'Manaus - AM', uf: 'AM', cnpjMestreLocked: true,
+  anexoServicosForcado: null, anexoDetectadoPGDAS: null, ncmDetalhado: [],
+  beneficios: { comercio: { cestaPct: 0, reduzido60Pct: 0 }, servicos: { cnae: '6920-6/01', categoria: 'regulamentada', aliqPersonalizada: 8.8 } },
+  historico: [
+    { faturamento: 86000, comprasRegimeNormal: 7500, folha: 34000 },
+    { faturamento: 89000, comprasRegimeNormal: 8000, folha: 34500 },
+    { faturamento: 93000, comprasRegimeNormal: 8500, folha: 35500 },
+    { faturamento: 96000, comprasRegimeNormal: 9000, folha: 36000 },
+    { faturamento: 99000, comprasRegimeNormal: 9500, folha: 37000 },
+    { faturamento: 104000, comprasRegimeNormal: 10000, folha: 38000 },
+  ],
+  historicoCompetencias: ['2027-01', '2027-02', '2027-03', '2027-04', '2027-05', '2027-06'],
+};
+
+const MOCK_ARQUIVOS_COMERCIO = [
+  { id: 'ex-c1', name: 'NFe_saida_grandes_clientes_202701.xml', size: 27650, status: 'ok', tipo: 'nfe_saida', badge: 'XML Saída lido (B2B — CNPJ destinatário) · exemplo', dados: { vNF: 0, isB2B: true } },
+  { id: 'ex-c2', name: 'NFCe_lote_balcao_202701.xml', size: 48210, status: 'ok', tipo: 'nfce_saida', badge: 'NFC-e (mod. 65) · Saída B2C identificada · exemplo', dados: { vNF: 0, isB2B: false } },
+  { id: 'ex-c3', name: 'NFe_entrada_fornecedores_202701.xml', size: 21870, status: 'ok', tipo: 'nfe_entrada', badge: 'XML Entrada lido (fornecedor Regime Normal — gera crédito de CBS) · exemplo', dados: { vNF: 0, credito: true } },
+  { id: 'ex-c4', name: 'PGDAS-D_extrato_202701.pdf', size: 61230, status: 'ok', tipo: 'pgdas', badge: 'PGDAS-D processado · RBT12 identificado · exemplo', dados: { rbt12: null, faturamento: null } },
+  { id: 'ex-c5', name: 'Folha_pagamento_202701.pdf', size: 39840, status: 'ok', tipo: 'folha', badge: 'Folha de Pagamento identificada · exemplo', dados: { folha: null, proLabore: null } },
+];
+const MOCK_ARQUIVOS_SERVICOS = [
+  { id: 'ex-s1', name: 'NFe_entrada_insumos_202701.xml', size: 15320, status: 'ok', tipo: 'nfe_entrada', badge: 'XML Entrada lido (fornecedor Simples Nacional — sem crédito pleno) · exemplo', dados: { vNF: 0, credito: false } },
+  { id: 'ex-s2', name: 'PGDAS-D_extrato_202701.pdf', size: 57120, status: 'ok', tipo: 'pgdas', badge: 'PGDAS-D processado · RBT12, faturamento, CNAE e Anexo III identificados · exemplo', dados: { rbt12: null, faturamento: null, cnae: '6920-6/01' } },
+  { id: 'ex-s3', name: 'Folha_pagamento_eSocial_202701.pdf', size: 44210, status: 'ok', tipo: 'folha', badge: 'Folha de Pagamento / eSocial identificada · exemplo', dados: { folha: null, proLabore: null } },
+];
+const MOCK_ARQUIVOS_INDUSTRIA = [
+  { id: 'ex-i1', name: 'NFe_saida_distribuidores_202701.xml', size: 31240, status: 'ok', tipo: 'nfe_saida', badge: 'XML Saída lido (B2B — CNPJ destinatário) · exemplo', dados: { vNF: 0, isB2B: true } },
+  { id: 'ex-i2', name: 'NFe_entrada_materia_prima_202701.xml', size: 26580, status: 'ok', tipo: 'nfe_entrada', badge: 'XML Entrada lido (fornecedor Regime Normal — gera crédito de CBS) · insumo industrial identificado (CFOP) · exemplo', dados: { vNF: 0, credito: true } },
+  { id: 'ex-i3', name: 'PGDAS-D_extrato_202701.pdf', size: 62340, status: 'ok', tipo: 'pgdas', badge: 'PGDAS-D processado · RBT12 identificado · Anexo II identificado · exemplo', dados: { rbt12: null, faturamento: null } },
+  { id: 'ex-i4', name: 'Folha_pagamento_fabril_202701.pdf', size: 45120, status: 'ok', tipo: 'folha', badge: 'Folha de Pagamento identificada · exemplo', dados: { folha: null, proLabore: null } },
+];
+
+/* ============================= DOCUMENT PARSER (100% client-side) ============================= */
+function parseCurrencyBR(str) {
+  if (!str) return null;
+  let s = str.trim();
+  if (/,\d{2}$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+  else s = s.replace(/,/g, '');
+  const n = parseFloat(s);
+  return isFinite(n) ? n : null;
+}
+function numberNear(text, keywordRegex) {
+  const m = keywordRegex.exec(text);
+  if (!m) return null;
+  const val = m[m.length - 1];
+  return parseCurrencyBR(val);
+}
+const NUM = String.raw`([\d]{1,3}(?:\.\d{3})*(?:,\d{2})?|\d+(?:,\d{2})?)`;
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result || ''));
+    r.onerror = () => reject(new Error('read failed'));
+    r.readAsText(file, 'utf-8');
+  });
+}
+function crudeTextFromBinary(raw) {
+  const tj = raw.match(/\(([^()\\]{1,200})\)\s*Tj/g) || [];
+  const fromTj = tj.map(m => m.replace(/\)\s*Tj$/, '').replace(/^\(/, '')).join(' ');
+  const printable = (raw.match(/[ -~]{4,}/g) || []).join(' ');
+  return (fromTj + ' ' + printable).slice(0, 200000);
+}
+function extractCNAE(text) {
+  const m = /CNAE[^\d]{0,20}(\d{4}[-\/]?\d?[-\/]?\d{0,2})/i.exec(text);
+  return m ? m[1] : null;
+}
+// Reconhece, no texto do extrato do PGDAS-D, qual Anexo/segmento do Simples Nacional a empresa está
+// apurando — usado para calibrar automaticamente o setor e, no caso de serviços, o Anexo III/IV/V.
+function detectAnexoPGDAS(text) {
+  const t = (text || '').toLowerCase();
+  if (/anexo\s*iv\b|constru[cç][aã]o\s*civil|servi[cç]os?\s*com\s*recolhimento\s*de\s*cpp\s*fora/.test(t)) return { setor: 'servicos', anexo: 'IV' };
+  if (/anexo\s*v\b|fator\s*r/.test(t)) return { setor: 'servicos', anexo: 'V' };
+  if (/anexo\s*iii\b|loca[cç][aã]o\s*de\s*bens|presta[cç][aã]o\s*de\s*servi[cç]os/.test(t)) return { setor: 'servicos', anexo: 'III' };
+  if (/anexo\s*ii\b|venda\s*de\s*mercadorias\s*industrializadas|ind[uú]stria/.test(t)) return { setor: 'industria', anexo: 'II' };
+  if (/anexo\s*i\b|revenda\s*de\s*mercadorias|com[eé]rcio/.test(t)) return { setor: 'comercio', anexo: 'I' };
+  return null;
+}
+function formatCNPJDisplay(digits) {
+  if (!digits || digits.length !== 14) return digits || '—';
+  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12, 14)}`;
+}
+// Quando o contador digita o CNPJ manualmente (sem subir nenhum documento), este helper fixa o CNPJ mestre
+// assim que o número completo (14 dígitos) é digitado — do contrário, o cadastro nunca travava por digitação
+// manual (só travava via upload de Cartão CNPJ/PGDAS-D/XML), e sem essa trava o cliente nunca era salvo
+// automaticamente na carteira local, mesmo com todos os campos preenchidos.
+function aplicarCnpjDigitado(valor) {
+  const digits = valor.replace(/\D/g, '');
+  const patch = { cnpj: valor };
+  if (digits.length === 14) {
+    patch.cnpj = formatCNPJDisplay(digits);
+    patch.cnpjMestreLocked = true;
+  }
+  return patch;
+}
+// Localiza o primeiro CNPJ (14 dígitos) mencionado no texto de um documento (Cartão CNPJ, PGDAS-D, folha).
+function extractCNPJFromText(text) {
+  const matches = (text || '').match(/\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}/g);
+  if (!matches) return null;
+  for (const m of matches) {
+    const digits = m.replace(/\D/g, '');
+    if (digits.length === 14) return digits;
+  }
+  return null;
+}
+function extractRazaoSocial(text) {
+  const m = /(NOME EMPRESARIAL|RAZ[AÃ]O SOCIAL)[:\s\-]{1,10}([A-ZÀ-Ü0-9 .,&\-]{5,90})/i.exec(text);
+  return m ? m[2].trim().replace(/\s{2,}/g, ' ') : null;
+}
+function extractCNAEFromCartao(text) {
+  const m = /(\d{2}\.?\d{2}-?\d-?\d{2})/.exec(text);
+  return m ? m[1] : null;
+}
+function extractMunicipioUF(text) {
+  const mm = /MUNIC[IÍ]PIO[:\s\-]{1,10}([A-ZÀ-Ü ]{3,40})/i.exec(text);
+  const uf = /\bUF[:\s\-]{1,5}([A-Z]{2})\b/.exec(text);
+  if (mm && uf) return `${mm[1].trim()} - ${uf[1]}`;
+  if (mm) return mm[1].trim();
+  if (uf) return uf[1];
+  return null;
+}
+
+// Tenta identificar a competência (YYYY-MM) de um XML a partir da data de emissão.
+function extractCompetenciaXML(doc) {
+  const el = doc.querySelector('ide > dhEmi') || doc.querySelector('ide > dEmi');
+  if (!el) return null;
+  const m = /^(\d{4})-(\d{2})/.exec(el.textContent.trim());
+  return m ? `${m[1]}-${m[2]}` : null;
+}
+// Tenta identificar a competência (YYYY-MM) a partir do texto ou do nome de um PDF/TXT.
+function extractCompetenciaFromText(text, filename) {
+  const src1 = filename || '', src2 = text || '';
+  let m = /(\d{2})\/(20\d{2})/.exec(src2) || /(\d{2})\/(20\d{2})/.exec(src1);
+  if (m) return `${m[2]}-${m[1]}`;
+  m = /(20\d{2})[-_]?(0[1-9]|1[0-2])\b/.exec(src1) || /(20\d{2})[-_]?(0[1-9]|1[0-2])\b/.exec(src2);
+  if (m) return `${m[1]}-${m[2]}`;
+  return null;
+}
+
+// Parser bruto do XML: apenas extrai os campos, sem decidir direção/titularidade — isso é feito na
+// etapa de validação cruzada por CNPJ mestre (finalizeFile).
+function parseNFeXML(xmlText) {
+  const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+  if (doc.querySelector('parsererror')) return null;
+  const isNFe = doc.querySelector('infNFe') || doc.querySelector('NFe') || doc.querySelector('ide');
+  if (!isNFe) return null;
+
+  const modEl = doc.querySelector('ide > mod');
+  const mod = modEl ? modEl.textContent.trim() : null;
+  const vNFEl = doc.querySelector('total > ICMSTot > vNF') || doc.querySelector('ICMSTot > vNF') || doc.querySelector('vNF');
+  const vNF = vNFEl ? parseFloat(vNFEl.textContent) : 0;
+  const emitCNPJEl = doc.querySelector('emit > CNPJ');
+  const emitCNPJ = emitCNPJEl ? emitCNPJEl.textContent.trim() : null;
+  const destCNPJEl = doc.querySelector('dest > CNPJ');
+  const destCNPJ = destCNPJEl ? destCNPJEl.textContent.trim() : null;
+  const destCPFEl = doc.querySelector('dest > CPF');
+  const crtEl = doc.querySelector('emit > CRT');
+  const crt = crtEl ? crtEl.textContent.trim() : null;
+  const ufEmitEl = doc.querySelector('emit > enderEmit > UF') || doc.querySelector('enderEmit > UF');
+  const ufEmit = ufEmitEl ? ufEmitEl.textContent.trim().toUpperCase() : null;
+
+  const detEls = Array.from(doc.querySelectorAll('det'));
+  const porCategoria = { cesta: 0, reduzido60: 0, padrao: 0 };
+  const itensNCM = [];
+  let cClassTribAmostra = null;
+  let temInsumoIndustrial = false;
+  const CFOP_INDUSTRIAIS = new Set(['1101', '2101', '1124', '2124', '1253', '2253', '1102', '2102', '1551', '2551']);
+  detEls.forEach(det => {
+    const prod = det.querySelector('prod');
+    if (!prod) return;
+    const ncmEl = prod.querySelector('NCM');
+    const xProdEl = prod.querySelector('xProd');
+    const vProdEl = prod.querySelector('vProd');
+    const cfopEl = prod.querySelector('CFOP');
+    const vProd = vProdEl ? (parseFloat(vProdEl.textContent) || 0) : 0;
+    const ncm = ncmEl ? ncmEl.textContent.trim() : null;
+    const cat = classifyNCM(ncm);
+    porCategoria[cat] += vProd;
+    itensNCM.push({ ncm, descricao: xProdEl ? xProdEl.textContent.trim() : null, vProd, categoria: cat });
+    if (cfopEl && CFOP_INDUSTRIAIS.has(cfopEl.textContent.trim())) temInsumoIndustrial = true;
+    if (!cClassTribAmostra) {
+      const cct = det.querySelector('cClassTrib');
+      if (cct && cct.textContent.trim()) cClassTribAmostra = cct.textContent.trim();
+    }
+  });
+
+  const competencia = extractCompetenciaXML(doc);
+  return { mod, vNF: vNF || 0, emitCNPJ, destCNPJ, destCPF: destCPFEl ? destCPFEl.textContent.trim() : null, crt, ufEmit, porCategoria, itensNCM, cClassTribAmostra, competencia, temInsumoIndustrial };
+}
+
+// Etapa 1 — leitura bruta do arquivo, sem decidir titularidade (isso acontece em finalizeFile,
+// depois que o CNPJ mestre é conhecido).
+async function parseFileRaw(file) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  const base = { id: `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 8)}`, name: file.name, size: file.size, ext };
+  try {
+    if (ext === 'xml') {
+      const text = await readFileAsText(file);
+      const parsed = parseNFeXML(text);
+      if (!parsed) return { ...base, parseStatus: 'erro', parseBadgeBase: 'XML não reconhecido como NF-e/NFC-e' };
+      return { ...base, ...parsed, ownCNPJ: parsed.emitCNPJ, parseStatus: 'ok', parseBadgeBase: '' };
+    }
+    if (ext === 'txt' || ext === 'pdf') {
+      const text = ext === 'txt' ? await readFileAsText(file) : crudeTextFromBinary(await readFileAsText(file));
+      const lower = text.toLowerCase();
+      const nameLower = file.name.toLowerCase();
+      const cnae = extractCNAE(text);
+      const competencia = extractCompetenciaFromText(text, file.name);
+      const compNote = competencia ? ` · competência ${formatCompetencia(competencia)}` : '';
+      const ownCNPJ = extractCNPJFromText(text);
+
+      const looksCartao = /cart[aã]o\s*cnpj|comprovante\s*de\s*inscri[cç][aã]o|situa[cç][aã]o\s*cadastral/i.test(lower) || /cartao.?cnpj|comprovante/i.test(nameLower);
+      const looksPgdas = !looksCartao && (/pgdas|rbt\s*-?\s*12|simples\s*nacional/i.test(lower) || /pgdas|das/i.test(nameLower));
+      const looksFolha = !looksCartao && (/folha\s*(de\s*)?pagamento|pr[oó]-?labore|esocial|dctfweb|inss/i.test(lower) || /folha|esocial|dctf/i.test(nameLower));
+
+      if (looksCartao) {
+        const razaoSocialDetectada = extractRazaoSocial(text);
+        const cnaeDetectado = extractCNAEFromCartao(text);
+        const municipioUFDetectado = extractMunicipioUF(text);
+        return {
+          ...base, tipo: 'cartao_cnpj', competencia, ownCNPJ,
+          dados: {}, razaoSocialDetectada, cnaeDetectado, municipioUFDetectado,
+          parseStatus: ownCNPJ ? 'ok' : 'estimado',
+          parseBadgeBase: `Cartão CNPJ identificado${razaoSocialDetectada ? ' · razão social extraída' : ''}${cnaeDetectado ? ' · CNAE extraído' : ''}${municipioUFDetectado ? ' · município/UF extraído' : ''}${compNote}`,
+        };
+      }
+      if (looksPgdas) {
+        const rbt12 = numberNear(text, new RegExp(`RBT[\\s-]*12[^\\d]{0,20}${NUM}`, 'i'));
+        const faturamento = numberNear(text, new RegExp(`(receita\\s*bruta|faturamento)[^\\d]{0,25}${NUM}`, 'i'));
+        const anexoDetectado = detectAnexoPGDAS(text);
+        const anexoNote = anexoDetectado ? ` · Anexo ${anexoDetectado.anexo} identificado` : '';
+        return {
+          ...base, tipo: 'pgdas', competencia, ownCNPJ, dados: { rbt12, faturamento, cnae }, anexoDetectado,
+          parseStatus: (rbt12 || faturamento) ? 'ok' : 'estimado',
+          parseBadgeBase: (rbt12 || faturamento)
+            ? `PGDAS-D processado${rbt12 ? ' · RBT12 extraído' : ''}${faturamento ? ' · faturamento extraído' : ''}${cnae ? ' · CNAE identificado' : ''}${anexoNote}${compNote}`
+            : `PGDAS-D identificado · valores não localizados no texto (estimados — confira manualmente)${anexoNote}${compNote}`,
+        };
+      }
+      if (looksFolha) {
+        const folha = numberNear(text, new RegExp(`(total\\s*(da\\s*)?folha|folha\\s*bruta|folha\\s*(de\\s*)?pagamento)[^\\d]{0,25}${NUM}`, 'i'));
+        const proLabore = numberNear(text, new RegExp(`pr[oó]-?labore[^\\d]{0,20}${NUM}`, 'i'));
+        return {
+          ...base, tipo: 'folha', competencia, ownCNPJ, dados: { folha, proLabore, cnae },
+          parseStatus: (folha || proLabore) ? 'ok' : 'estimado',
+          parseBadgeBase: (folha || proLabore)
+            ? `Folha de Pagamento identificada${folha ? ' · total bruto extraído' : ''}${proLabore ? ' · pró-labore extraído' : ''}${compNote}`
+            : `Folha de Pagamento identificada · valores não localizados no texto (estimados — confira manualmente)${compNote}`,
+        };
+      }
+      return {
+        ...base, tipo: 'desconhecido', competencia, ownCNPJ, dados: { cnae },
+        parseStatus: 'estimado',
+        parseBadgeBase: ext === 'pdf'
+          ? 'PDF processado localmente, sem padrão reconhecido — modo estimativa (ajuste os campos manualmente)'
+          : 'Arquivo de texto sem padrão reconhecido — modo estimativa (ajuste os campos manualmente)',
+      };
+    }
+    return { ...base, parseStatus: 'erro', parseBadgeBase: 'Formato não suportado (aceitos: .xml, .pdf, .txt)' };
+  } catch (e) {
+    return { ...base, parseStatus: 'erro', parseBadgeBase: 'Falha ao processar o arquivo' };
+  }
+}
+
+// Etapa 2 — trava de integridade: valida cada arquivo contra o CNPJ mestre da empresa em análise.
+function finalizeFile(r, master, isMasterSource) {
+  const rec = { id: r.id, name: r.name, size: r.size, ext: r.ext, competencia: r.competencia || null };
+  if (r.parseStatus === 'erro') { rec.status = 'erro'; rec.tipo = 'erro'; rec.badge = r.parseBadgeBase; rec.dados = {}; return rec; }
+
+  if (r.ext === 'xml') {
+    if (!master) {
+      rec.status = 'estimado'; rec.tipo = 'desconhecido'; rec.dados = {};
+      rec.badge = 'XML lido, mas o CNPJ mestre ainda não foi definido — envie um Cartão CNPJ, PGDAS-D, ou informe o CNPJ manualmente.';
+      return rec;
+    }
+    const cctNote = r.cClassTribAmostra ? ` · cClassTrib: ${r.cClassTribAmostra}` : '';
+    const compNote = r.competencia ? ` · competência ${formatCompetencia(r.competencia)}` : '';
+    if (r.emitCNPJ === master) {
+      const ufNote = r.ufEmit ? ` · UF ${r.ufEmit}` : '';
+      if (r.mod === '65') {
+        rec.status = 'ok'; rec.tipo = 'nfce_saida';
+        rec.badge = `Aprovado: vinculado com sucesso à empresa · NFC-e (mod. 65) · Saída B2C identificada${cctNote}${compNote}${ufNote}`;
+        rec.dados = { vNF: r.vNF, isB2B: false, porCategoria: r.porCategoria, ufEmit: r.ufEmit, itensNCM: r.itensNCM };
+      } else {
+        const isB2B = !!r.destCNPJ;
+        rec.status = 'ok'; rec.tipo = 'nfe_saida';
+        rec.badge = `Aprovado: vinculado com sucesso à empresa · XML Saída lido (${isB2B ? 'B2B — CNPJ dest.' : 'B2C — CPF/consumidor'})${cctNote}${compNote}${ufNote}`;
+        rec.dados = { vNF: r.vNF, isB2B, porCategoria: r.porCategoria, ufEmit: r.ufEmit, itensNCM: r.itensNCM };
+      }
+    } else if (r.destCNPJ === master) {
+      const credito = r.crt === '3';
+      const insumoNote = r.temInsumoIndustrial ? ' · insumo industrial identificado (CFOP)' : '';
+      rec.status = 'ok'; rec.tipo = 'nfe_entrada';
+      rec.badge = `Aprovado: vinculado com sucesso à empresa · XML Entrada lido (fornecedor ${credito ? 'Regime Normal — gera crédito de CBS' : 'Simples Nacional — sem crédito pleno'})${insumoNote}${compNote}`;
+      rec.dados = { vNF: r.vNF, credito };
+    } else {
+      const divergente = r.emitCNPJ || r.destCNPJ || null;
+      rec.status = 'rejeitado'; rec.tipo = 'rejeitado'; rec.dados = {};
+      rec.badge = divergente
+        ? `REJEITADO: o arquivo "${r.name}" pertence ao CNPJ ${formatCNPJDisplay(divergente)}, incompatível com a empresa em análise (${formatCNPJDisplay(master)}). O arquivo foi descartado e não compõe o cálculo.`
+        : `REJEITADO: não foi possível identificar o CNPJ do arquivo "${r.name}" para validação cruzada. O arquivo foi descartado por segurança.`;
+    }
+    return rec;
+  }
+
+  // Documentos em texto (Cartão CNPJ, PGDAS-D, folha, desconhecido)
+  if (master && r.ownCNPJ && r.ownCNPJ !== master) {
+    rec.status = 'rejeitado'; rec.tipo = 'rejeitado'; rec.dados = {};
+    rec.badge = `REJEITADO: o arquivo "${r.name}" pertence ao CNPJ ${formatCNPJDisplay(r.ownCNPJ)}, incompatível com a empresa em análise (${formatCNPJDisplay(master)}). O arquivo foi descartado e não compõe o cálculo.`;
+    return rec;
+  }
+  rec.status = r.parseStatus; rec.tipo = r.tipo; rec.dados = r.dados; rec.anexoDetectado = r.anexoDetectado || null;
+  const prefix = isMasterSource ? 'CNPJ mestre definido a partir deste documento · '
+    : (r.ownCNPJ ? 'Aprovado: vinculado com sucesso à empresa · ' : '');
+  const unverified = (!r.ownCNPJ && master) ? ' · CNPJ não localizado no documento — validação cruzada não aplicada' : '';
+  rec.badge = prefix + r.parseBadgeBase + unverified;
+  return rec;
+}
+
+function aggregateFiles(arquivos) {
+  const agg = {
+    faturamentoSaida: 0, comprasEntrada: 0, comprasComCredito: 0, vendasB2B: 0, vendasB2C: 0,
+    rbt12: null, pgdasFaturamento: 0, folha: 0, proLabore: 0, temFolha: false,
+    comercioCategorias: { cesta: 0, reduzido60: 0, padrao: 0 }, cnaeDetectado: null, ufDetectada: null, anexoDetectado: null,
+    ncmMap: {},
+  };
+  arquivos.forEach(f => {
+    if (f.status === 'erro' || f.status === 'rejeitado') return;
+    if (f.tipo === 'nfce_saida' || f.tipo === 'nfe_saida') {
+      const v = f.dados.vNF || 0;
+      agg.faturamentoSaida += v;
+      if (f.dados.isB2B) agg.vendasB2B += v; else agg.vendasB2C += v;
+      if (f.dados.porCategoria) {
+        agg.comercioCategorias.cesta += f.dados.porCategoria.cesta || 0;
+        agg.comercioCategorias.reduzido60 += f.dados.porCategoria.reduzido60 || 0;
+        agg.comercioCategorias.padrao += f.dados.porCategoria.padrao || 0;
+      }
+      if (f.dados.ufEmit && !agg.ufDetectada) agg.ufDetectada = f.dados.ufEmit;
+      if (f.dados.itensNCM) {
+        f.dados.itensNCM.forEach(item => {
+          const key = item.ncm || '(sem NCM)';
+          if (!agg.ncmMap[key]) agg.ncmMap[key] = { ncm: key, descricao: item.descricao || null, categoria: item.categoria, valorTotal: 0, ocorrencias: 0 };
+          agg.ncmMap[key].valorTotal += item.vProd || 0;
+          agg.ncmMap[key].ocorrencias += 1;
+          if (!agg.ncmMap[key].descricao && item.descricao) agg.ncmMap[key].descricao = item.descricao;
+        });
+      }
+    } else if (f.tipo === 'nfe_entrada') {
+      const v = f.dados.vNF || 0;
+      agg.comprasEntrada += v;
+      if (f.dados.credito) agg.comprasComCredito += v;
+    } else if (f.tipo === 'pgdas') {
+      if (f.dados.rbt12) agg.rbt12 = f.dados.rbt12;
+      if (f.dados.faturamento) agg.pgdasFaturamento += f.dados.faturamento;
+      if (f.dados.cnae && !agg.cnaeDetectado) agg.cnaeDetectado = f.dados.cnae;
+      if (f.anexoDetectado && !agg.anexoDetectado) agg.anexoDetectado = f.anexoDetectado;
+    } else if (f.tipo === 'folha') {
+      if (f.dados.folha) { agg.folha += f.dados.folha; agg.temFolha = true; }
+      if (f.dados.proLabore) { agg.proLabore += f.dados.proLabore; agg.temFolha = true; }
+      if (f.dados.cnae && !agg.cnaeDetectado) agg.cnaeDetectado = f.dados.cnae;
+    }
+  });
+  if (agg.faturamentoSaida === 0 && agg.pgdasFaturamento > 0) agg.faturamentoSaida = agg.pgdasFaturamento;
+  return agg;
+}
+
+// Agrupa os arquivos processados por competência (YYYY-MM) identificada, retornando até as 6 mais recentes.
+function aggregateHistorico(arquivos) {
+  const byMonth = {};
+  arquivos.forEach(f => {
+    if (f.status === 'erro' || f.status === 'rejeitado' || !f.competencia) return;
+    if (!byMonth[f.competencia]) byMonth[f.competencia] = { faturamento: 0, comprasRegimeNormal: 0, folha: 0 };
+    if (f.tipo === 'nfce_saida' || f.tipo === 'nfe_saida') {
+      byMonth[f.competencia].faturamento += f.dados.vNF || 0;
+    } else if (f.tipo === 'nfe_entrada' && f.dados.credito) {
+      byMonth[f.competencia].comprasRegimeNormal += f.dados.vNF || 0;
+    } else if (f.tipo === 'folha') {
+      byMonth[f.competencia].folha += (f.dados.folha || 0) + (f.dados.proLabore || 0);
+    }
+  });
+  const competencias = Object.keys(byMonth).sort().slice(-6);
+  return { competencias, porMes: competencias.map(k => byMonth[k]) };
+}
+
+/* ============================= UI PIECES ============================= */
+function NumberField({ label, value, onChange, prefix, suffix, min = 0, step = 1000, hint }) {
+  return (
+    <div>
+      <label className="field-label">{label}</label>
+      <div className="relative flex items-center">
+        {prefix && <span className="absolute left-3 text-[13px]" style={{ color: 'var(--ink-soft)' }}>{prefix}</span>}
+        <input type="number" min={min} step={step} value={value}
+          onChange={e => onChange(parseFloat(e.target.value) || 0)}
+          style={{ paddingLeft: prefix ? '28px' : '11px', paddingRight: suffix ? '30px' : '11px' }} />
+        {suffix && <span className="absolute right-3 text-[13px]" style={{ color: 'var(--ink-soft)' }}>{suffix}</span>}
+      </div>
+      {hint && <p className="text-[11.5px] mt-1" style={{ color: 'var(--ink-soft)' }}>{hint}</p>}
+    </div>
+  );
+}
+
+function SectorToggle({ setor, onChange }) {
+  const opts = [
+    { key: 'comercio', label: 'Comércio', Icon: IconBuilding },
+    { key: 'industria', label: 'Indústria', Icon: IconFactory },
+    { key: 'servicos', label: 'Serviços', Icon: IconBriefcase },
+  ];
+  return (
+    <div className="inline-flex p-1 rounded-full card" style={{ borderColor: 'var(--line)' }}>
+      {opts.map(o => {
+        const active = setor === o.key;
+        return (
+          <button key={o.key} onClick={() => onChange(o.key)}
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+            style={active ? { background: 'var(--petroleo)', color: '#fff' } : { background: 'transparent', color: 'var(--ink-soft)' }}>
+            <o.Icon className="w-4 h-4" strokeWidth={2} />
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function RegimeCard({ regime, isMelhor }) {
+  const groupColor = { federal: 'var(--petroleo)', estadual: 'var(--amber)', municipal: 'var(--amber)', previdenciario: 'var(--ink-soft)', unificado: 'var(--petroleo)' };
+  return (
+    <div className={`card p-5 flex flex-col gap-4 relative ${isMelhor ? 'badge-glow' : ''}`}>
+      {isMelhor && (
+        <div className="absolute -top-3 left-5 px-3 py-1 rounded-full text-[11.5px] font-semibold flex items-center gap-1.5" style={{ background: 'var(--emerald)', color: '#fff' }}>
+          <IconCheckCircle className="w-3.5 h-3.5" strokeWidth={2.4} /> Regime mais vantajoso
+        </div>
+      )}
+      <div>
+        <h3 className="font-display text-[18px] leading-snug">{regime.label}</h3>
+        <p className="text-[12.5px] mt-0.5" style={{ color: 'var(--ink-soft)' }}>Carga efetiva sobre faturamento</p>
+      </div>
+      <div className="flex items-baseline gap-2">
+        <span className="font-mono text-[26px] font-semibold">{fmtPct(regime.cargaEfetiva)}</span>
+      </div>
+      <div className="grid grid-cols-2 gap-3 py-3" style={{ borderTop: '1px solid var(--line-soft)', borderBottom: '1px solid var(--line-soft)' }}>
+        <div><p className="text-[11px]" style={{ color: 'var(--ink-soft)' }}>Desembolso mensal</p><p className="font-mono text-[15px] font-medium">{fmtBRL2(regime.mensal)}</p></div>
+        <div><p className="text-[11px]" style={{ color: 'var(--ink-soft)' }}>Desembolso anual</p><p className="font-mono text-[15px] font-medium">{fmtBRL(regime.anual)}</p></div>
+      </div>
+      <div className="flex flex-col gap-2">
+        {regime.linhas.map((l, i) => (
+          <div key={i} className="flex items-start justify-between gap-3 text-[12.5px]">
+            <span className="flex items-center gap-1.5" style={{ color: 'var(--ink-soft)' }}>
+              <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ background: groupColor[l.grupo] }} />
+              {l.label}
+            </span>
+            <span className="font-mono shrink-0">{fmtBRL2(l.valor)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AlertCard({ tone, Icon, title, children }) {
+  const map = {
+    amber: { bg: 'var(--amber-tint)', ring: 'var(--amber)' },
+    petroleo: { bg: 'var(--petroleo-tint)', ring: 'var(--petroleo)' },
+    violet: { bg: 'var(--violet-tint)', ring: 'var(--violet)' },
+  };
+  const styles = map[tone] || map.petroleo;
+  return (
+    <div className="rounded-xl p-4 flex gap-3" style={{ background: styles.bg, border: `1px solid ${styles.ring}55` }}>
+      <Icon className="w-5 h-5 shrink-0 mt-0.5" strokeWidth={1.8} style={{ color: styles.ring }} />
+      <div>
+        <h4 className="text-[13.5px] font-semibold mb-1">{title}</h4>
+        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--ink-soft)' }}>{children}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================= BENEFITS PANEL (LC 214/2025) ============================= */
+function BenefitsPanel({ setor, comercio, servicos, onChangeComercio, onChangeServicos }) {
+  const c = aliqCBSComercio(comercio);
+  const s = aliqCBSServicos(servicos);
+  return (
+    <div className="card p-5 mb-6">
+      <h2 className="font-display text-[17px] font-semibold flex items-center gap-2 mb-1">
+        <IconTag className="w-5 h-5" style={{ color: 'var(--violet)' }} strokeWidth={1.9} />
+        Benefícios da Reforma Tributária (LC 214/2025)
+      </h2>
+      <p className="text-[13px] mb-4" style={{ color: 'var(--ink-soft)' }}>
+        Classificação automática a partir dos NCMs (comércio/indústria) ou do CNAE (serviços) identificados nos
+        documentos, com ajuste manual disponível.
+      </p>
+
+      {setor !== 'servicos' ? (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="field-label">Cesta Básica Nacional — alíquota zero</label>
+              <div className="relative flex items-center">
+                <input type="number" min="0" max="100" step="1" value={comercio.cestaPct}
+                  onChange={e => onChangeComercio({ cestaPct: parseFloat(e.target.value) || 0 })} style={{ paddingRight: '28px' }} />
+                <span className="absolute right-3 text-[13px]" style={{ color: 'var(--ink-soft)' }}>%</span>
+              </div>
+            </div>
+            <div>
+              <label className="field-label">Medicamentos / insumos agro / disp. médicos — redução 60%</label>
+              <div className="relative flex items-center">
+                <input type="number" min="0" max="100" step="1" value={comercio.reduzido60Pct}
+                  onChange={e => onChangeComercio({ reduzido60Pct: parseFloat(e.target.value) || 0 })} style={{ paddingRight: '28px' }} />
+                <span className="absolute right-3 text-[13px]" style={{ color: 'var(--ink-soft)' }}>%</span>
+              </div>
+            </div>
+            <div>
+              <label className="field-label">Padrão — alíquota de referência (8,8%)</label>
+              <div className="relative flex items-center">
+                <input type="text" readOnly value={`${c.padrao}%`} style={{ opacity: 0.75 }} />
+              </div>
+            </div>
+          </div>
+          {c.excedeSoma && (
+            <p className="text-[12px]" style={{ color: 'var(--rose)' }}>A soma dos percentuais informados excede 100% — ajuste os valores.</p>
+          )}
+          <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid var(--line-soft)' }}>
+            <span className="text-[13px]" style={{ color: 'var(--ink-soft)' }}>Alíquota média ponderada de CBS sobre vendas</span>
+            <span className="font-mono text-[16px] font-semibold" style={{ color: 'var(--violet)' }}>{fmtPct(c.aliq)}</span>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="field-label">CNAE fiscal principal</label>
+              <input type="text" placeholder="Ex.: 6920-6/01" value={servicos.cnae}
+                onChange={e => onChangeServicos({ cnae: e.target.value })} />
+            </div>
+            <div>
+              <label className="field-label">Classificação do benefício</label>
+              <select value={servicos.categoria} onChange={e => onChangeServicos({ categoria: e.target.value })}>
+                <option value="padrao">Padrão (8,8%)</option>
+                <option value="regulamentada">Profissão regulamentada — art. 127 (−30% → 6,16%)</option>
+                <option value="saude_educacao">Saúde / Educação (−60% → 3,52%)</option>
+                <option value="personalizado">Personalizado</option>
+              </select>
+            </div>
+          </div>
+          {servicos.categoria === 'personalizado' && (
+            <div className="sm:w-1/2">
+              <label className="field-label">Alíquota de CBS personalizada</label>
+              <div className="relative flex items-center">
+                <input type="number" min="0" max="8.8" step="0.1" value={servicos.aliqPersonalizada}
+                  onChange={e => onChangeServicos({ aliqPersonalizada: parseFloat(e.target.value) || 0 })} style={{ paddingRight: '28px' }} />
+                <span className="absolute right-3 text-[13px]" style={{ color: 'var(--ink-soft)' }}>%</span>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid var(--line-soft)' }}>
+            <span className="text-[13px]" style={{ color: 'var(--ink-soft)' }}>{s.label}</span>
+            <span className="font-mono text-[16px] font-semibold" style={{ color: 'var(--violet)' }}>{fmtPct(s.aliq)}</span>
+          </div>
+        </div>
+      )}
+
+      <p className="text-[11px] mt-4" style={{ color: 'var(--ink-soft)' }}>
+        Classificação ilustrativa gerada a partir dos documentos processados — confirme o enquadramento legal nos
+        Anexos I a III e no art. 127 da LC nº 214/2025 antes de aplicar no parecer técnico.
+      </p>
+    </div>
+  );
+}
+
+/* ============================= DEMONSTRATIVO CRONOLÓGICO MÊS A MÊS (6 COMPETÊNCIAS) ============================= */
+function HistoricoTable({ d, onChangeMes, printMode }) {
+  const linhas = useMemo(() => d.historico.map(mes => computeMesRegimes(d, mes)), [d]);
+  const totais = useMemo(() => {
+    const acc = { faturamento: 0, compras: 0, folha: 0, tradicional: 0, hibrido: 0, presumido: 0 };
+    d.historico.forEach((mes, i) => {
+      acc.faturamento += mes.faturamento; acc.compras += mes.comprasRegimeNormal; acc.folha += mes.folha;
+      acc.tradicional += linhas[i].tradicional; acc.hibrido += linhas[i].hibrido; acc.presumido += linhas[i].presumido;
+    });
+    return acc;
+  }, [d, linhas]);
+  const totaisRegimes = { tradicional: totais.tradicional, hibrido: totais.hibrido, presumido: totais.presumido };
+  const keys = ['tradicional', 'hibrido', 'presumido'];
+  let melhorTotal = keys[0], piorTotal = keys[0];
+  keys.forEach(k => { if (totaisRegimes[k] < totaisRegimes[melhorTotal]) melhorTotal = k; if (totaisRegimes[k] > totaisRegimes[piorTotal]) piorTotal = k; });
+  const economiaTotal = totaisRegimes[piorTotal] - totaisRegimes[melhorTotal];
+  const labelRegime = { tradicional: 'Simples Tradicional', hibrido: 'Simples Híbrido', presumido: 'Lucro Presumido' };
+
+  const cellBase = printMode ? 'py-1.5 px-2 text-right font-mono' : 'py-2 px-2.5 text-right font-mono text-[12.5px]';
+  const headBase = printMode ? 'py-1.5 px-2 text-right' : 'py-2 px-2.5 text-right text-[11px] font-medium';
+
+  return (
+    <div className={printMode ? '' : 'card p-5 mb-6'}>
+      {!printMode && (
+        <>
+          <h2 className="font-display text-[17px] font-semibold mb-1">Demonstrativo Cronológico Mês a Mês (6 competências)</h2>
+          <p className="text-[13px] mb-4" style={{ color: 'var(--ink-soft)' }}>
+            Compara os 3 regimes competência a competência, com base nos dados reais importados (ou nos valores do
+            exemplo). Faturamento, compras de PJ do Regime Normal e folha bruta + pró-labore são editáveis por mês.
+          </p>
+        </>
+      )}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse" style={{ minWidth: printMode ? 'auto' : '860px' }}>
+          <thead>
+            <tr style={{ background: printMode ? '#EEF3F1' : 'var(--paper)' }}>
+              <th className={printMode ? 'py-1.5 px-2 text-left' : 'py-2 px-2.5 text-left text-[11px] font-medium'} style={{ borderBottom: printMode ? '1px solid #D3DCDA' : '1px solid var(--line-soft)' }}>Competência</th>
+              <th className={headBase} style={{ borderBottom: printMode ? '1px solid #D3DCDA' : '1px solid var(--line-soft)' }}>Faturamento</th>
+              <th className={headBase} style={{ borderBottom: printMode ? '1px solid #D3DCDA' : '1px solid var(--line-soft)' }}>Compras PJ Reg. Normal</th>
+              <th className={headBase} style={{ borderBottom: printMode ? '1px solid #D3DCDA' : '1px solid var(--line-soft)' }}>Folha + Pró-labore</th>
+              <th className={headBase} style={{ borderBottom: printMode ? '1px solid #D3DCDA' : '1px solid var(--line-soft)' }}>Tradicional</th>
+              <th className={headBase} style={{ borderBottom: printMode ? '1px solid #D3DCDA' : '1px solid var(--line-soft)' }}>Híbrido</th>
+              <th className={headBase} style={{ borderBottom: printMode ? '1px solid #D3DCDA' : '1px solid var(--line-soft)' }}>Presumido</th>
+              <th className={headBase} style={{ borderBottom: printMode ? '1px solid #D3DCDA' : '1px solid var(--line-soft)' }}>Economia do mês</th>
+            </tr>
+          </thead>
+          <tbody>
+            {d.historico.map((mes, i) => {
+              const r = linhas[i];
+              const comp = d.historicoCompetencias[i] ? formatCompetencia(d.historicoCompetencias[i]) : null;
+              return (
+                <tr key={i}>
+                  <td className={printMode ? 'py-1.5 px-2' : 'py-2 px-2.5 text-[12.5px] font-medium'} style={{ borderBottom: '1px solid ' + (printMode ? '#EEF1F0' : 'var(--line-soft)') }}>
+                    Mês {i + 1}{comp && <span className="block text-[10.5px] font-normal" style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>{comp}</span>}
+                  </td>
+                  {['faturamento', 'comprasRegimeNormal', 'folha'].map(field => (
+                    <td key={field} className={cellBase} style={{ borderBottom: '1px solid ' + (printMode ? '#EEF1F0' : 'var(--line-soft)') }}>
+                      {printMode ? fmtBRL2(mes[field]) : (
+                        <input type="number" min="0" step="500" value={mes[field]}
+                          onChange={e => onChangeMes(i, { [field]: parseFloat(e.target.value) || 0 })}
+                          className="text-right w-full" style={{ border: 'none', background: 'transparent', padding: '2px 4px' }} />
+                      )}
+                    </td>
+                  ))}
+                  {['tradicional', 'hibrido', 'presumido'].map(k => (
+                    <td key={k} className={cellBase} style={{
+                      borderBottom: '1px solid ' + (printMode ? '#EEF1F0' : 'var(--line-soft)'),
+                      color: k === r.melhor ? 'var(--emerald)' : undefined,
+                      fontWeight: k === r.melhor ? 600 : 400,
+                    }}>
+                      {fmtBRL2(r[k])}
+                      <span className="block font-normal" style={{ fontSize: printMode ? '9.5px' : '10px', color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>
+                        {fmtPct(r.efetivas[k])}
+                      </span>
+                    </td>
+                  ))}
+                  <td className={cellBase} style={{ borderBottom: '1px solid ' + (printMode ? '#EEF1F0' : 'var(--line-soft)'), color: 'var(--emerald)' }}>
+                    {fmtBRL2(r.economia)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          <tfoot>
+            <tr style={{ background: printMode ? '#E4F4EC' : 'var(--emerald-tint)' }}>
+              <td className={printMode ? 'py-1.5 px-2 font-semibold' : 'py-2 px-2.5 text-[12.5px] font-semibold'}>Total (6 meses)</td>
+              <td className={cellBase + ' font-semibold'}>{fmtBRL2(totais.faturamento)}</td>
+              <td className={cellBase + ' font-semibold'}>{fmtBRL2(totais.compras)}</td>
+              <td className={cellBase + ' font-semibold'}>{fmtBRL2(totais.folha)}</td>
+              <td className={cellBase + ' font-semibold'} style={{ color: melhorTotal === 'tradicional' ? 'var(--emerald)' : undefined }}>{fmtBRL2(totais.tradicional)}</td>
+              <td className={cellBase + ' font-semibold'} style={{ color: melhorTotal === 'hibrido' ? 'var(--emerald)' : undefined }}>{fmtBRL2(totais.hibrido)}</td>
+              <td className={cellBase + ' font-semibold'} style={{ color: melhorTotal === 'presumido' ? 'var(--emerald)' : undefined }}>{fmtBRL2(totais.presumido)}</td>
+              <td className={cellBase + ' font-semibold'} style={{ color: 'var(--emerald)' }}>{fmtBRL2(economiaTotal)}</td>
+            </tr>
+            <tr>
+              <td className={printMode ? 'py-1.5 px-2 italic' : 'py-2 px-2.5 text-[12.5px] italic'} style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>Projeção proporcional (12 meses)</td>
+              <td className={cellBase} style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>{fmtBRL2(totais.faturamento * 2)}</td>
+              <td className={cellBase} style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>{fmtBRL2(totais.compras * 2)}</td>
+              <td className={cellBase} style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>{fmtBRL2(totais.folha * 2)}</td>
+              <td className={cellBase} style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>{fmtBRL2(totais.tradicional * 2)}</td>
+              <td className={cellBase} style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>{fmtBRL2(totais.hibrido * 2)}</td>
+              <td className={cellBase} style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>{fmtBRL2(totais.presumido * 2)}</td>
+              <td className={cellBase} style={{ color: printMode ? '#5A6B70' : 'var(--ink-soft)' }}>{fmtBRL2(economiaTotal * 2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {!printMode && (
+        <p className="text-[11px] mt-3" style={{ color: 'var(--ink-soft)' }}>
+          Regime mais vantajoso no período: <strong style={{ color: 'var(--emerald)' }}>{labelRegime[melhorTotal]}</strong> — economia total de {fmtBRL2(economiaTotal)} nos 6 meses,
+          equivalente a {fmtBRL2(economiaTotal * 2)} na projeção proporcional de 12 meses. A alíquota efetiva do Simples Nacional e a alíquota de CBS ponderada usadas
+          no cálculo mensal seguem o RBT12 e os benefícios fiscais atualmente configurados no simulador.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ============================= CLIENTES SALVOS (BANCO DE DADOS) ============================= */
+function formatDataHora(ts) {
+  if (!ts) return '—';
+  try { return new Date(ts).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  catch (e) { return '—'; }
+}
+
+function ClientesPanel({ db, dbStatus, d, onLoadClient }) {
+  const [clientes, setClientes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [mensagem, setMensagem] = useState(null);
+
+  useEffect(() => {
+    if (!db) { setCarregando(false); return; }
+    const unsub = db.collection('clientes').orderBy('atualizadoEm', 'desc').limit(50).onSnapshot(
+      (snap) => {
+        setClientes(snap.docs.map(doc => ({ id: doc.id, ...(doc.data() || {}) })));
+        setCarregando(false);
+      },
+      (err) => { setCarregando(false); setMensagem({ tipo: 'erro', texto: 'Não foi possível carregar a lista de clientes salvos.' }); }
+    );
+    return () => unsub();
+  }, [db]);
+
+  const salvarClienteAtual = async () => {
+    if (!db) return;
+    setSalvando(true); setMensagem(null);
+    const cnpjDigits = d.cnpj ? d.cnpj.replace(/\D/g, '') : '';
+    const payload = { ...d, atualizadoEm: Date.now() };
+    try {
+      if (cnpjDigits && cnpjDigits.length === 14) {
+        await db.doc(`clientes/${cnpjDigits}`).set(payload);
+      } else {
+        await db.collection('clientes').add(payload);
+      }
+      setMensagem({ tipo: 'ok', texto: 'Cliente salvo com sucesso no banco de dados.' });
+    } catch (e) {
+      setMensagem({ tipo: 'erro', texto: 'Falha ao salvar: ' + (e && e.message ? e.message : 'erro desconhecido') });
+    }
+    setSalvando(false);
+  };
+
+  const carregarCliente = (cliente) => {
+    const { id, atualizadoEm, ...dados } = cliente;
+    onLoadClient({ ...BLANK_STATE(dados.setor || 'comercio'), ...dados });
+    setMensagem({ tipo: 'ok', texto: `Cliente "${dados.razaoSocial || id}" carregado.` });
+  };
+
+  const excluirCliente = async (cliente) => {
+    if (!db) return;
+    if (!window.confirm(`Excluir permanentemente o cliente "${cliente.razaoSocial || cliente.id}" do banco de dados?`)) return;
+    try {
+      await db.doc(`clientes/${cliente.id}`).delete();
+    } catch (e) {
+      setMensagem({ tipo: 'erro', texto: 'Falha ao excluir: ' + (e && e.message ? e.message : 'erro desconhecido') });
+    }
+  };
+
+  return (
+    <div className="card p-5 mb-6">
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="font-display text-[17px] font-semibold flex items-center gap-2">
+          <IconDatabase className="w-5 h-5" style={{ color: 'var(--petroleo)' }} strokeWidth={1.8} />
+          Clientes Salvos (Banco de Dados)
+        </h2>
+        <button onClick={salvarClienteAtual} disabled={!db || salvando}
+          className="flex items-center gap-1.5 text-[12.5px] px-3 py-2 rounded-lg font-medium shrink-0"
+          style={{ background: db ? 'var(--petroleo)' : 'var(--line-soft)', color: db ? '#fff' : 'var(--ink-soft)', opacity: salvando ? 0.7 : 1, cursor: db ? 'pointer' : 'not-allowed' }}>
+          <IconDatabase className="w-3.5 h-3.5" strokeWidth={2} /> {salvando ? 'Salvando...' : 'Salvar / Atualizar Cliente Atual'}
+        </button>
+      </div>
+      <p className="text-[13px] mb-3" style={{ color: 'var(--ink-soft)' }}>
+        Grava o cliente em análise (dados cadastrais, simulação, benefícios e demonstrativo de 6 meses) em um banco
+        de dados persistente, para consultar ou retomar depois. Os registros ficam disponíveis para quem acessar
+        este artefato dentro da sua organização.
+      </p>
+
+      {!db && (
+        <p className="text-[12px] mb-3" style={{ color: 'var(--amber)' }}>
+          {dbStatus === 'checking' ? 'Conectando ao banco de dados...' : 'Banco de dados não disponível nesta visualização.'}
+        </p>
+      )}
+      {mensagem && (
+        <p className="text-[12px] mb-3" style={{ color: mensagem.tipo === 'ok' ? 'var(--emerald)' : 'var(--rose)' }}>{mensagem.texto}</p>
+      )}
+
+      {db && (
+        carregando ? (
+          <p className="text-[12.5px]" style={{ color: 'var(--ink-soft)' }}>Carregando clientes salvos...</p>
+        ) : clientes.length === 0 ? (
+          <p className="text-[12.5px]" style={{ color: 'var(--ink-soft)' }}>Nenhum cliente salvo ainda.</p>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {clientes.map(c => (
+              <div key={c.id} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg" style={{ background: 'var(--paper)' }}>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium truncate">{c.razaoSocial || '(sem razão social)'}</p>
+                  <p className="text-[11.5px] font-mono" style={{ color: 'var(--ink-soft)' }}>
+                    CNPJ {c.cnpj || '—'} · {c.setor === 'comercio' ? 'Comércio' : 'Serviços'} · atualizado em {formatDataHora(c.atualizadoEm)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button onClick={() => carregarCliente(c)} className="p-1.5 rounded-md" title="Carregar este cliente"
+                    style={{ background: 'var(--petroleo-tint)', color: 'var(--petroleo)' }}>
+                    <IconRefresh className="w-3.5 h-3.5" strokeWidth={2} />
+                  </button>
+                  <button onClick={() => excluirCliente(c)} className="p-1.5 rounded-md" title="Excluir"
+                    style={{ background: 'var(--rose-tint)', color: 'var(--rose)' }}>
+                    <IconTrash className="w-3.5 h-3.5" strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+
+/* ============================= UPLOAD MODULE ============================= */
+function FileRow({ f, onToggleDirecao, onRemove }) {
+  const statusColor = (f.status === 'erro' || f.status === 'rejeitado') ? 'var(--rose)' : f.status === 'estimado' ? 'var(--amber)' : 'var(--emerald)';
+  const canToggle = f.tipo === 'nfe_saida' || f.tipo === 'nfe_entrada';
+  return (
+    <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg" style={{ background: f.status === 'rejeitado' ? 'var(--rose-tint)' : 'var(--paper)' }}>
+      <IconFileText className="w-4.5 h-4.5 shrink-0 mt-0.5" style={{ color: 'var(--ink-soft)' }} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[13px] font-medium truncate">{f.name}</span>
+          <span className="text-[11px] font-mono" style={{ color: 'var(--ink-soft)' }}>{fmtBytes(f.size)}</span>
+        </div>
+        <p className="text-[11.5px] mt-0.5" style={{ color: statusColor }}>{f.badge}</p>
+      </div>
+      <div className="flex items-center gap-1.5 shrink-0">
+        {canToggle && (
+          <button onClick={() => onToggleDirecao(f.id)} title="Alternar Saída/Entrada"
+            className="p-1.5 rounded-md" style={{ background: 'var(--petroleo-tint)', color: 'var(--petroleo)' }}>
+            <IconSwap className="w-3.5 h-3.5" strokeWidth={2} />
+          </button>
+        )}
+        <button onClick={() => onRemove(f.id)} title="Remover"
+          className="p-1.5 rounded-md" style={{ background: 'var(--rose-tint)', color: 'var(--rose)' }}>
+          <IconTrash className="w-3.5 h-3.5" strokeWidth={2} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function UploadModule({ setor, d, onApply, onLoadExample }) {
+  const [arquivos, setArquivos] = useState([]);
+  const [processando, setProcessando] = useState(false);
+  const [progresso, setProgresso] = useState({ atual: 0, total: 0 });
+  const [dragActive, setDragActive] = useState(false);
+  const [aba, setAba] = useState('validos');
+  const inputRef = useRef(null);
+  const skipNextAggRef = useRef(false);
+
+  const agg = useMemo(() => aggregateFiles(arquivos), [arquivos]);
+  const hasResults = arquivos.some(f => f.status !== 'erro' && f.status !== 'rejeitado');
+  const validos = arquivos.filter(f => f.status !== 'rejeitado');
+  const rejeitados = arquivos.filter(f => f.status === 'rejeitado');
+
+  const handleFiles = useCallback(async (fileList) => {
+    const files = Array.from(fileList).filter(f => /\.(xml|pdf|txt)$/i.test(f.name));
+    if (!files.length) return;
+    setProcessando(true);
+    setProgresso({ atual: 0, total: files.length });
+
+    // Etapa 1 — leitura bruta de cada arquivo (com o mesmo ritmo visual de antes).
+    const raws = [];
+    for (let i = 0; i < files.length; i++) {
+      await new Promise(res => setTimeout(res, 220 + Math.random() * 260));
+      raws.push(await parseFileRaw(files[i]));
+      setProgresso({ atual: i + 1, total: files.length });
+    }
+
+    // Etapa 2 — define (ou confirma) o CNPJ mestre da empresa em análise.
+    let master = d.cnpjMestreLocked && d.cnpj ? d.cnpj.replace(/\D/g, '') : (d.cnpj ? d.cnpj.replace(/\D/g, '') : null);
+    if (master && master.length !== 14) master = null;
+    const masterPatch = {};
+    let masterSourceId = null;
+    if (!master) {
+      const cartao = raws.find(r => r.tipo === 'cartao_cnpj' && r.ownCNPJ);
+      const pgdas = raws.find(r => r.tipo === 'pgdas' && r.ownCNPJ);
+      const xml = raws.find(r => r.ext === 'xml' && r.ownCNPJ);
+      const escolhido = cartao || pgdas || xml;
+      if (escolhido) {
+        master = escolhido.ownCNPJ;
+        masterSourceId = escolhido.id;
+        masterPatch.cnpj = formatCNPJDisplay(master);
+        masterPatch.cnpjMestreLocked = true;
+        if (escolhido.razaoSocialDetectada) masterPatch.razaoSocial = escolhido.razaoSocialDetectada;
+        if (escolhido.municipioUFDetectado) masterPatch.municipioUF = escolhido.municipioUFDetectado;
+        if (escolhido.cnaeDetectado) masterPatch.beneficios = { servicos: { cnae: escolhido.cnaeDetectado, categoria: classifyCNAE(escolhido.cnaeDetectado) } };
+      }
+    } else if (!d.cnpjMestreLocked) {
+      masterPatch.cnpjMestreLocked = true;
+    }
+
+    // Etapa 3 — trava de integridade: valida/rejeita cada arquivo contra o CNPJ mestre.
+    const finalizados = raws.map(r => finalizeFile(r, master, r.id === masterSourceId));
+    setArquivos(prev => [...prev, ...finalizados]);
+    if (Object.keys(masterPatch).length) onApply(masterPatch);
+    setProcessando(false);
+  }, [d.cnpj, d.cnpjMestreLocked]);
+
+  useEffect(() => {
+    if (skipNextAggRef.current) { skipNextAggRef.current = false; return; }
+    if (!arquivos.length) return;
+    const patch = {};
+    if (agg.faturamentoSaida > 0) patch.faturamentoMensal = Math.round(agg.faturamentoSaida);
+    if (agg.comprasEntrada > 0) {
+      patch.comprasMensais = Math.round(agg.comprasEntrada);
+      patch.pctFornecedorRegimeNormal = Math.round((agg.comprasComCredito / agg.comprasEntrada) * 100);
+    }
+    if (agg.vendasB2B + agg.vendasB2C > 0) patch.pctB2B = Math.round((agg.vendasB2B / (agg.vendasB2B + agg.vendasB2C)) * 100);
+    if (agg.rbt12) patch.rbt12 = Math.round(agg.rbt12);
+    if (agg.temFolha) {
+      if (agg.folha) patch.folhaMensal = Math.round(agg.folha);
+      if (agg.proLabore) patch.proLabore = Math.round(agg.proLabore);
+    }
+    const totalCat = agg.comercioCategorias.cesta + agg.comercioCategorias.reduzido60 + agg.comercioCategorias.padrao;
+    if (setor === 'comercio' && totalCat > 0) {
+      patch.beneficios = { comercio: {
+        cestaPct: Math.round((agg.comercioCategorias.cesta / totalCat) * 100),
+        reduzido60Pct: Math.round((agg.comercioCategorias.reduzido60 / totalCat) * 100),
+      } };
+    }
+    if (setor === 'servicos' && agg.cnaeDetectado) {
+      patch.beneficios = { servicos: { cnae: agg.cnaeDetectado, categoria: classifyCNAE(agg.cnaeDetectado) } };
+    }
+    if (agg.ufDetectada) {
+      patch.uf = agg.ufDetectada;
+      if (setor !== 'servicos' && agg.ufDetectada === 'AM') patch.aliquotaEstMun = 20;
+    }
+    if (agg.anexoDetectado) {
+      patch.anexoDetectadoPGDAS = agg.anexoDetectado.anexo;
+      patch.setor = agg.anexoDetectado.setor;
+      patch.anexoServicosForcado = agg.anexoDetectado.setor === 'servicos' ? agg.anexoDetectado.anexo : null;
+    }
+    const ncmList = Object.values(agg.ncmMap).sort((a, b) => b.valorTotal - a.valorTotal);
+    if (ncmList.length > 0) patch.ncmDetalhado = ncmList;
+    const histAgg = aggregateHistorico(arquivos);
+    if (histAgg.competencias.length > 0) patch.historicoUpdate = histAgg;
+    if (Object.keys(patch).length) onApply(patch);
+    // eslint-disable-next-line
+  }, [arquivos]);
+
+  const toggleDirecao = (id) => {
+    setArquivos(prev => prev.map(f => {
+      if (f.id !== id) return f;
+      if (f.tipo === 'nfe_saida') return { ...f, tipo: 'nfe_entrada', badge: 'XML Entrada lido (reclassificado manualmente)', dados: { vNF: f.dados.vNF, credito: false } };
+      if (f.tipo === 'nfe_entrada') return { ...f, tipo: 'nfe_saida', badge: 'XML Saída lido (reclassificado manualmente)', dados: { vNF: f.dados.vNF, isB2B: false } };
+      return f;
+    }));
+  };
+  const removeFile = (id) => setArquivos(prev => prev.filter(f => f.id !== id));
+
+  const handleExample = (key) => {
+    skipNextAggRef.current = true;
+    const mocks = { comercio: MOCK_ARQUIVOS_COMERCIO, industria: MOCK_ARQUIVOS_INDUSTRIA, servicos: MOCK_ARQUIVOS_SERVICOS };
+    setArquivos(mocks[key]);
+    onLoadExample(key);
+  };
+
+  return (
+    <div className="card p-5 mb-6">
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="font-display text-[17px] font-semibold flex items-center gap-2">
+          <IconUpload className="w-5 h-5" style={{ color: 'var(--petroleo)' }} strokeWidth={1.9} />
+          Upload de documentos fiscais e contábeis
+        </h2>
+      </div>
+      <p className="text-[13px] mb-4" style={{ color: 'var(--ink-soft)' }}>
+        Envie o Cartão CNPJ, XMLs de NF-e/NFC-e (saídas e entradas), extrato do PGDAS-D e relatório de folha de
+        pagamento. O primeiro documento define o CNPJ mestre da empresa em análise, e todo arquivo enviado depois
+        passa por validação cruzada contra esse CNPJ antes de compor o cálculo.
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_240px] gap-3 mb-4">
+        <div
+          className={`dropzone p-6 flex flex-col items-center justify-center text-center gap-2 cursor-pointer ${dragActive ? 'drag-active' : ''}`}
+          onClick={() => inputRef.current && inputRef.current.click()}
+          onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={(e) => { e.preventDefault(); setDragActive(false); handleFiles(e.dataTransfer.files); }}
+        >
+          <IconUpload className="w-7 h-7" style={{ color: 'var(--petroleo)' }} strokeWidth={1.6} />
+          <p className="text-[13.5px] font-medium">Arraste os arquivos aqui ou clique para selecionar</p>
+          <p className="text-[11.5px]" style={{ color: 'var(--ink-soft)' }}>.xml (NF-e/NFC-e) · .pdf / .txt (Cartão CNPJ, PGDAS-D, folha, eSocial, DCTFWeb)</p>
+          <input ref={inputRef} type="file" multiple accept=".xml,.pdf,.txt" className="hidden"
+            onChange={(e) => { handleFiles(e.target.files); e.target.value = ''; }} />
+        </div>
+        {d.cnpjMestreLocked ? (
+          <div className="rounded-lg p-3 text-[11.5px]" style={{ background: 'var(--emerald-tint)', color: 'var(--emerald)' }}>
+            <p className="font-semibold mb-1">CNPJ mestre definido</p>
+            <p className="font-mono">{d.cnpj}</p>
+            <p className="mt-1">Todo arquivo enviado é validado automaticamente contra este CNPJ.</p>
+          </div>
+        ) : (
+          <div>
+            <label className="field-label">CNPJ do contribuinte (opcional)</label>
+            <input type="text" placeholder="00.000.000/0000-00" value={d.cnpj}
+              onChange={(e) => onApply(aplicarCnpjDigitado(e.target.value))} />
+            <p className="text-[11px] mt-1" style={{ color: 'var(--ink-soft)' }}>Se deixado em branco, será definido automaticamente pelo primeiro Cartão CNPJ, PGDAS-D ou XML enviado.</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button onClick={() => handleExample('comercio')}
+          className="flex items-center gap-1.5 text-[12.5px] px-3 py-2 rounded-lg font-medium" style={{ background: 'var(--violet-tint)', color: 'var(--violet)' }}>
+          <IconSparkle className="w-3.5 h-3.5" strokeWidth={2} /> Carregar Exemplo Real: Comércio Varejista
+        </button>
+        <button onClick={() => handleExample('industria')}
+          className="flex items-center gap-1.5 text-[12.5px] px-3 py-2 rounded-lg font-medium" style={{ background: 'var(--violet-tint)', color: 'var(--violet)' }}>
+          <IconSparkle className="w-3.5 h-3.5" strokeWidth={2} /> Carregar Exemplo Real: Indústria
+        </button>
+        <button onClick={() => handleExample('servicos')}
+          className="flex items-center gap-1.5 text-[12.5px] px-3 py-2 rounded-lg font-medium" style={{ background: 'var(--violet-tint)', color: 'var(--violet)' }}>
+          <IconSparkle className="w-3.5 h-3.5" strokeWidth={2} /> Carregar Exemplo Real: Empresa de Serviços
+        </button>
+      </div>
+
+      {processando && (
+        <div className="mb-4">
+          <p className="text-[12.5px] flex items-center gap-2 mb-1.5" style={{ color: 'var(--petroleo)' }}>
+            <IconLoader className="w-3.5 h-3.5 spin" strokeWidth={2.4} /> Processando documentos fiscais... ({progresso.atual}/{progresso.total})
+          </p>
+          <div className="progress-track"><div className="progress-fill" style={{ width: `${(progresso.atual / Math.max(1, progresso.total)) * 100}%` }} /></div>
+        </div>
+      )}
+
+      {arquivos.length > 0 && (
+        <div className="mb-4">
+          <div className="flex gap-2 mb-2">
+            <button onClick={() => setAba('validos')}
+              className="text-[12px] font-medium px-3 py-1.5 rounded-full"
+              style={aba === 'validos' ? { background: 'var(--emerald)', color: '#fff' } : { background: 'var(--paper)', color: 'var(--ink-soft)' }}>
+              Documentos Válidos ({validos.length})
+            </button>
+            <button onClick={() => setAba('rejeitados')}
+              className="text-[12px] font-medium px-3 py-1.5 rounded-full"
+              style={aba === 'rejeitados' ? { background: 'var(--rose)', color: '#fff' } : { background: 'var(--paper)', color: 'var(--ink-soft)' }}>
+              Documentos Rejeitados por Divergência ({rejeitados.length})
+            </button>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {(aba === 'validos' ? validos : rejeitados).map(f => <FileRow key={f.id} f={f} onToggleDirecao={toggleDirecao} onRemove={removeFile} />)}
+            {(aba === 'validos' ? validos : rejeitados).length === 0 && (
+              <p className="text-[12px] py-2" style={{ color: 'var(--ink-soft)' }}>Nenhum documento nesta categoria.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {hasResults && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <div className="rounded-lg p-3" style={{ background: 'var(--petroleo-tint)' }}>
+            <p className="text-[10.5px]" style={{ color: 'var(--petroleo)' }}>Faturamento apurado nos XMLs</p>
+            <p className="font-mono text-[14px] font-semibold" style={{ color: 'var(--petroleo)' }}>{fmtBRL2(agg.faturamentoSaida)}</p>
+          </div>
+          <div className="rounded-lg p-3" style={{ background: 'var(--emerald-tint)' }}>
+            <p className="text-[10.5px]" style={{ color: 'var(--emerald)' }}>Compras com crédito de CBS</p>
+            <p className="font-mono text-[14px] font-semibold" style={{ color: 'var(--emerald)' }}>
+              {fmtBRL2(agg.comprasComCredito)} {agg.comprasEntrada > 0 && `(${Math.round((agg.comprasComCredito / agg.comprasEntrada) * 100)}%)`}
+            </p>
+          </div>
+          <div className="rounded-lg p-3" style={{ background: 'var(--amber-tint)' }}>
+            <p className="text-[10.5px]" style={{ color: 'var(--amber)' }}>Vendas B2C / B2B</p>
+            <p className="font-mono text-[14px] font-semibold" style={{ color: 'var(--amber)' }}>
+              {agg.vendasB2B + agg.vendasB2C > 0
+                ? `${Math.round((agg.vendasB2C / (agg.vendasB2B + agg.vendasB2C)) * 100)}% / ${Math.round((agg.vendasB2B / (agg.vendasB2B + agg.vendasB2C)) * 100)}%`
+                : '—'}
+            </p>
+          </div>
+          <div className="rounded-lg p-3" style={{ background: 'var(--line-soft)' }}>
+            <p className="text-[10.5px]" style={{ color: 'var(--ink-soft)' }}>Folha apurada (CPP)</p>
+            <p className="font-mono text-[14px] font-semibold">{agg.temFolha ? fmtBRL2(agg.folha + agg.proLabore) : '—'}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-start gap-2 p-3 rounded-lg" style={{ background: 'var(--paper)', border: '1px solid var(--line-soft)' }}>
+        <IconLock className="w-4 h-4 shrink-0 mt-0.5" style={{ color: 'var(--ink-soft)' }} strokeWidth={1.8} />
+        <p className="text-[11.5px]" style={{ color: 'var(--ink-soft)' }}>
+          Processamento 100% local no seu navegador. Nenhum dado fiscal sensível ou pessoal é transferido a servidores
+          externos, em conformidade com a LGPD. Os campos extraídos permanecem totalmente editáveis para ajuste fino.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================= PARECER (formal document) ============================= */
+function Parecer({ d, calc, onClose }) {
+  const hoje = new Date();
+  const dataStr = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const regimes = calc.regimes;
+  const melhorLabel = regimes[calc.melhor].label;
+  const setorLabel = d.setor === 'comercio' ? 'comércio varejista' : d.setor === 'industria' ? 'atividade industrial' : 'prestação de serviços';
+  const ordenados = ['tradicional', 'hibrido', 'presumido'].slice().sort((a, b) => regimes[a].mensal - regimes[b].mensal);
+  const pior = ordenados[ordenados.length - 1];
+  const economiaAnual = regimes[pior].anual - regimes[calc.melhor].anual;
+  const isComercio = d.setor === 'comercio';
+  const isIndustria = d.setor === 'industria';
+  const isServicos = d.setor === 'servicos';
+  const beneficioComercio = aliqCBSComercio(d.beneficios.comercio);
+  const beneficioServicos = aliqCBSServicos(d.beneficios.servicos);
+  const cppExplicacao = calc.cppNoDAS
+    ? (calc.nomeAnexo === 'III'
+        ? `ao passo que no Simples Nacional o encargo previdenciário já está embutido na alíquota unificada do DAS (Anexo III, Fator R de ${fmtPct(calc.fatorR)} ≥ 28%)`
+        : calc.nomeAnexo === 'V'
+        ? `ao passo que no Simples Nacional o encargo previdenciário também já está embutido na alíquota unificada do DAS (Anexo V, Fator R de ${fmtPct(calc.fatorR)}, abaixo de 28% — apenas o Anexo IV tem CPP recolhida fora do DAS)`
+        : `ao passo que no Simples Nacional o encargo previdenciário já está embutido na alíquota unificada do DAS (Anexo ${calc.nomeAnexo})`)
+    : `e também no Simples Nacional Tradicional e Híbrido, pois a atividade se enquadra no Anexo IV da LC 123/2006 (lista fechada de serviços — construção civil, obras de engenharia, vigilância, limpeza e conservação, advocacia), anexo em que a CPP patronal (20%, sem RAT nem contribuições a terceiros) não integra o DAS e é recolhida separadamente`;
+  const PRAZO_TEXTOS = {
+    hibrido: 'A opção pelo regime híbrido deve ser formalizada no Portal do Simples Nacional entre 1º e 30 de setembro de 2026, nos termos da Resolução CGSN nº 186/2026 e do art. 41, §3º, da LC nº 214/2025. A escolha produzirá efeitos de janeiro a junho de 2027, sendo admitida a retratação até 30 de novembro de 2026 — após essa data, a opção torna-se irretratável para o período. Empresas que não se manifestarem nessa janela terão nova oportunidade de decisão em março de 2027, válida para o segundo semestre daquele ano.',
+    tradicional: 'Por se tratar da manutenção do regime unificado do Simples Nacional (IBS e CBS recolhidos dentro do DAS), não há opção adicional a formalizar: a ausência de manifestação até 30 de setembro de 2026 — prazo fixado pela Resolução CGSN nº 186/2026 para a escolha do regime híbrido — mantém automaticamente a empresa no modelo tradicional a partir de 1º de janeiro de 2027.',
+    presumido: 'Recomenda-se a formalização da migração para o Lucro Presumido junto à Receita Federal do Brasil, opção que se aperfeiçoa com o pagamento da primeira quota do imposto devido relativa ao ano-calendário de 2027, observado o prazo usual do primeiro dia útil de janeiro de 2027, e que é irretratável para todo o ano-calendário.',
+  };
+  const prazoTexto = PRAZO_TEXTOS[calc.melhor];
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto" style={{ background: 'rgba(10,18,20,0.55)' }}>
+      <div className="no-print sticky top-0 flex justify-between items-center px-5 py-3" style={{ background: 'var(--petroleo-dark)' }}>
+        <p className="text-white text-sm font-medium">Parecer Técnico — pré-visualização</p>
+        <div className="flex gap-2">
+          <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--emerald)', color: '#fff' }}>
+            <IconPrinter className="w-4 h-4" strokeWidth={2} /> Imprimir / Salvar PDF
+          </button>
+          <button onClick={onClose} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'rgba(255,255,255,0.12)', color: '#fff' }}>
+            <IconX className="w-4 h-4" strokeWidth={2} /> Fechar
+          </button>
+        </div>
+      </div>
+
+      <div id="parecer-print" className="mx-auto my-6 px-10 py-10 max-w-[820px]" style={{ background: '#fff', color: '#1C2A30', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+        <div className="flex justify-between items-start pb-4" style={{ borderBottom: '2px solid #0C4A5C' }}>
+          <div>
+            <p className="font-display text-[19px] font-semibold" style={{ color: '#0C4A5C' }}>G&amp;M Contabilidade LTDA</p>
+            <p className="text-[12px]" style={{ color: '#5A6B70' }}>CNPJ 13.938.626/0001-29 · Rua Ceará, 168, Monte Castelo — Amazonas</p>
+            <p className="text-[12px]" style={{ color: '#5A6B70' }}>Resp. Técnico: Germano Cunha Miranda · CRC-AM-010043-O/9</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[11px]" style={{ color: '#5A6B70' }}>Exercício-base</p>
+            <p className="font-mono text-[20px] font-semibold" style={{ color: '#0C4A5C' }}>2027</p>
+          </div>
+        </div>
+
+        <h1 className="font-display text-[22px] font-semibold text-center mt-6 mb-1" style={{ color: '#1C2A30' }}>
+          Parecer Técnico de Enquadramento Tributário
+        </h1>
+        <p className="text-center text-[13px] mb-6" style={{ color: '#5A6B70' }}>Exercício 2027 · Emitido em {dataStr}</p>
+
+        <div className="flex flex-col gap-1.5 mb-6 text-[13px]">
+          <div><span style={{ color: '#5A6B70' }}>Cliente: </span><strong>{d.razaoSocial || '—'}</strong></div>
+          <div><span style={{ color: '#5A6B70' }}>CNPJ: </span><strong>{d.cnpj || '—'}</strong></div>
+          <div><span style={{ color: '#5A6B70' }}>Setor de atividade: </span><strong>{setorLabel}{isIndustria ? ' (Anexo II — LC nº 123/2006)' : ''}</strong></div>
+          <div><span style={{ color: '#5A6B70' }}>Faturamento mensal médio: </span><strong>{fmtBRL2(d.faturamentoMensal)}</strong></div>
+          <div><span style={{ color: '#5A6B70' }}>RBT12: </span><strong>{fmtBRL2(d.rbt12)}</strong></div>
+          <div><span style={{ color: '#5A6B70' }}>Unidade Federativa de Domicílio Fiscal: </span><strong>{d.uf === 'AM' ? 'Amazonas (AM)' : (d.uf || '—')}</strong></div>
+          {!isServicos && (
+            <div><span style={{ color: '#5A6B70' }}>Alíquota Modal de ICMS Aplicada: </span><strong>{d.aliquotaEstMun.toFixed(2)}%{d.uf === 'AM' && d.aliquotaEstMun === 20 ? ' (Legislação Estadual AM — LC nº 242/2022, que alterou a LC nº 19/97)' : ''}</strong></div>
+          )}
+          {d.anexoDetectadoPGDAS && (
+            <div><span style={{ color: '#5A6B70' }}>Enquadramento Atual no Simples Nacional: </span><strong>Apuração regular via PGDAS-D classificada no Anexo {d.anexoDetectadoPGDAS}, servindo de base histórica para a projeção e o confronto de cenários para 2027.</strong></div>
+          )}
+        </div>
+
+        {d.cnpjMestreLocked && (
+          <div className="mb-6 p-3 rounded-lg text-[12px] leading-relaxed text-justify" style={{ background: '#EEF3F1', border: '1px solid #C9D6D2', fontStyle: 'italic', color: '#324248' }}>
+            Certifica-se que todos os documentos fiscais e contábeis considerados na presente análise foram auditados
+            eletronicamente quanto à titularidade do CNPJ nº {d.cnpj}, assegurando a integridade e a rastreabilidade da
+            base de dados utilizada.
+          </div>
+        )}
+
+        <section className="mb-6">
+          <h2 className="font-display text-[15px] font-semibold mb-2" style={{ color: '#0C4A5C' }}>1. Objeto e Fundamentação Legal</h2>
+          <p className="text-[13px] leading-relaxed text-justify">
+            O presente parecer tem por objeto a análise comparativa dos regimes de tributação aplicáveis à pessoa jurídica acima
+            identificada para o exercício de 2027, à luz da Emenda Constitucional nº 132/2023 e da Lei Complementar nº 214/2025,
+            que instituíram a Contribuição sobre Bens e Serviços (CBS) em substituição ao PIS e à COFINS, e do Imposto sobre
+            Bens e Serviços (IBS) em fase de teste, sem prejuízo da manutenção integral do ICMS estadual e do ISS municipal
+            até o início da transição em 2029, observadas ainda as disposições complementares da Lei Complementar nº 227/2026.
+            Considera-se, adicionalmente, a Lei Complementar nº 123/2006, que disciplina o Regime Especial Unificado de
+            Arrecadação de Tributos e Contribuições devidos pelas Microempresas e Empresas de Pequeno Porte (Simples Nacional).
+            Adota-se, para a CBS, a alíquota de referência de 8,8%, projetada pelos estudos oficiais com base na metodologia
+            dos arts. 18 a 20 da LC nº 214/2025; ressalva-se que a fixação definitiva dessa alíquota, para os fatos geradores
+            de 2027, compete ao Senado Federal por resolução, com base em cálculo do TCU, no prazo do art. 349 da mesma lei
+            (até 15 de dezembro do ano anterior ao início de vigência), podendo o percentual definitivo divergir da referência
+            ora utilizada. A dedução aplicada ao DAS no regime híbrido corresponde ao percentual de repartição de Cofins e
+            PIS/Pasep (redistribuído para CBS e IBS a partir de 2027, de forma neutra em relação à arrecadação, nos termos da
+            LC nº 214/2025 e da LC nº 227/2026) de cada faixa dos Anexos I e III da LC nº 123/2006, conforme a Resolução CGSN
+            nº 94/2011 e suas atualizações — e não um percentual médio único para toda a faixa de faturamento.
+          </p>
+        </section>
+
+        <section className="mb-6">
+          <h2 className="font-display text-[15px] font-semibold mb-2" style={{ color: '#0C4A5C' }}>2. Quadro Comparativo Resumido</h2>
+          <table className="w-full text-[12.5px] border-collapse">
+            <thead>
+              <tr style={{ background: '#EEF3F1' }}>
+                <th className="text-left py-2 px-2" style={{ borderBottom: '1px solid #D3DCDA' }}>Regime</th>
+                <th className="text-right py-2 px-2" style={{ borderBottom: '1px solid #D3DCDA' }}>Desembolso mensal</th>
+                <th className="text-right py-2 px-2" style={{ borderBottom: '1px solid #D3DCDA' }}>Desembolso anual</th>
+                <th className="text-right py-2 px-2" style={{ borderBottom: '1px solid #D3DCDA' }}>Carga efetiva</th>
+              </tr>
+            </thead>
+            <tbody>
+              {['tradicional', 'hibrido', 'presumido'].map(k => (
+                <tr key={k} style={k === calc.melhor ? { background: '#E4F4EC' } : {}}>
+                  <td className="py-2 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>
+                    {regimes[k].label}{k === calc.melhor && <span style={{ color: '#0E8F62', fontWeight: 600 }}> ★ recomendado</span>}
+                  </td>
+                  <td className="py-2 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(regimes[k].mensal)}</td>
+                  <td className="py-2 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL(regimes[k].anual)}</td>
+                  <td className="py-2 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtPct(regimes[k].cargaEfetiva)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="text-[11.5px] mt-2" style={{ color: '#5A6B70' }}>
+            A memória de cálculo detalhada de cada regime — incluindo a partilha dos tributos por faixa e a alíquota
+            efetiva mês a mês — consta no <strong>Anexo A (Memorial Descritivo dos Cálculos)</strong>, que acompanha
+            este parecer.
+          </p>
+        </section>
+
+        <section className="mb-6">
+          <h2 className="font-display text-[14px] font-semibold mb-2" style={{ color: '#0C4A5C' }}>2.1. Demonstrativo Cronológico Mensal da Amostra Real (6 Meses)</h2>
+          <p className="text-[12.5px] leading-relaxed text-justify mb-3">
+            Para comprovar que a recomendação foi calculada sobre o histórico contábil e fiscal da própria empresa, e não
+            apenas sobre uma média mensal, apresenta-se a seguir o comparativo competência a competência dos 3 regimes,
+            com base nos documentos processados.
+          </p>
+          <HistoricoTable d={d} printMode={true} />
+        </section>
+
+        <section className="mb-6">
+          <h2 className="font-display text-[15px] font-semibold mb-2" style={{ color: '#0C4A5C' }}>3. Diagnóstico Técnico Circunstanciado</h2>
+          <p className="text-[13px] leading-relaxed text-justify mb-2">
+            A folha de pagamento mensal informada, de {fmtBRL2(d.folhaMensal)} de salários e {fmtBRL2(d.proLabore)} de
+            pró-labore, impacta diretamente o custo previdenciário da empresa: no Lucro Presumido, a CPP patronal incide
+            à alíquota de 28,8% sobre os salários e de 20% sobre o pró-labore (sem RAT nem contribuições a terceiros
+            neste último, nos termos do art. 22, III, da Lei nº 8.212/1991) — {cppExplicacao}.
+            Sob a não cumulatividade plena da CBS, a folha de pagamento e o pró-labore
+            não geram direito a crédito em nenhum regime, o que penaliza operações intensivas em mão de obra.
+          </p>
+          <p className="text-[13px] leading-relaxed text-justify mb-2">
+            No tocante ao aproveitamento de créditos, {fmtPct(d.pctFornecedorRegimeNormal / 100)} das aquisições da empresa
+            provêm de fornecedores sujeitos ao Regime Normal, gerando crédito de CBS de {fmtBRL2(calc.cbsCredito)} mensais
+            frente a um débito de {fmtBRL2(calc.cbsDebito)}, o que resulta em CBS líquida de{' '}
+            {fmtBRL2(Math.max(0, calc.cbsDebito - calc.cbsCredito))} nos regimes Híbrido e Lucro Presumido. Compras de
+            optantes do Simples Nacional que recolhem via DAS não geram crédito pleno de CBS para a adquirente, o que reduz a
+            vantagem do aproveitamento de créditos quando a carteira de fornecedores é majoritariamente optante do regime
+            simplificado.
+          </p>
+          {isIndustria && (
+            <p className="text-[13px] leading-relaxed text-justify mb-2">
+              No caso da atividade industrial, o volume de compras de matérias-primas e insumos produtivos —{' '}
+              {fmtBRL2(d.comprasMensais)} mensais, dos quais {fmtPct(d.pctFornecedorRegimeNormal / 100)} adquiridos de
+              fornecedores do Regime Normal — e o custo da folha fabril de {fmtBRL2(d.folhaMensal + d.proLabore)} são
+              determinantes na comparação entre os regimes, pois ambos definem a base de créditos de CBS aproveitáveis e o
+              peso da CPP patronal sobre o resultado. Adicionalmente, como a empresa destina {d.pctB2B}% de suas vendas a
+              clientes pessoa jurídica (distribuidores e lojistas), o crédito integral de CBS gerado nos regimes Híbrido e
+              Lucro Presumido tende a pesar na decisão de compra desses clientes, com reflexo na competitividade da indústria
+              perante concorrentes do Regime Normal.
+            </p>
+          )}
+          <p className="text-[13px] leading-relaxed text-justify">
+            O perfil de clientes da empresa, com {d.pctB2B}% das operações destinadas a pessoas jurídicas (B2B) e{' '}
+            {100 - d.pctB2B}% a consumidor final (B2C/PF), também é relevante para a estratégia comercial. Diante do exposto,
+            e considerando o conjunto de variáveis analisadas, o regime que resulta no menor desembolso tributário total para
+            o exercício de 2027 é o <strong>{melhorLabel}</strong>, com economia estimada de {fmtBRL(economiaAnual)} ao ano em
+            relação à opção de maior custo.
+          </p>
+        </section>
+
+        <section className="mb-6">
+          <h2 className="font-display text-[15px] font-semibold mb-2" style={{ color: '#0C4A5C' }}>4. Enquadramento em Benefícios da Reforma</h2>
+          <div className="p-3 rounded-lg text-[12.5px] leading-relaxed text-justify mb-3" style={{ background: '#EEF3F1', border: '1px solid #C9D6D2' }}>
+            <strong>O que é a CBS, em termos simples:</strong> a partir de 2027, a CBS substitui o PIS e a COFINS. Toda
+            venda gera um <em>débito</em> de CBS (o que a empresa deve recolher); toda compra de fornecedor que também
+            recolhe CBS pelo Regime Normal gera um <em>crédito</em> (o que a empresa pode abater). A empresa paga apenas a
+            diferença entre débito e crédito. Alguns produtos e serviços têm alíquota reduzida ou zerada por lei — é essa
+            classificação, produto a produto, que este item detalha.
+          </div>
+          {!isServicos ? (
+            <p className="text-[13px] leading-relaxed text-justify">
+              Da receita de vendas apurada nos documentos processados, {beneficioComercio.cesta}% corresponde a produtos da
+              Cesta Básica Nacional (Anexo I da LC nº 214/2025), sujeitos a alíquota zero de CBS; {beneficioComercio.red60}%
+              corresponde a medicamentos, dispositivos médicos ou insumos agropecuários (Anexos II e III da LC nº 214/2025),
+              com redução de 60% na alíquota (efetiva de 3,52%); e os {beneficioComercio.padrao}% remanescentes sujeitam-se à
+              alíquota padrão de referência de 8,8%. Como resultado, a alíquota média ponderada de CBS aplicada sobre a
+              receita de vendas é de {fmtPct(beneficioComercio.aliq)}. A classificação foi obtida automaticamente a partir
+              dos NCMs identificados nos XMLs de saída processados, por comparação com uma tabela de referência do
+              escritório — não é uma consulta oficial à Receita Federal — e <strong>deve ser conferida pelo contador
+              responsável</strong> antes da formalização do enquadramento, especialmente se o ramo de atividade da empresa
+              não for tipicamente associado a produtos da cesta básica.
+              {d.ncmDetalhado && d.ncmDetalhado.length > 0 && ' A relação completa dos NCMs identificados nos documentos, com suas descrições e classificações, consta no Anexo B deste parecer, para conferência item a item.'}
+            </p>
+          ) : (
+            <p className="text-[13px] leading-relaxed text-justify">
+              A atividade está enquadrada no CNAE {d.beneficios.servicos.cnae || 'não informado'}, classificado como{' '}
+              <strong>{beneficioServicos.label}</strong>, resultando em alíquota efetiva de CBS de{' '}
+              {fmtPct(beneficioServicos.aliq)} sobre a receita de serviços. Quando aplicável, a redução decorre do art. 127 da
+              LC nº 214/2025 (profissões regulamentadas com conselho de classe) ou dos dispositivos que tratam de serviços de
+              saúde e educação, devendo a classificação ser confirmada pelo contador responsável antes da formalização do
+              enquadramento.
+            </p>
+          )}
+        </section>
+
+        <section className="mb-6">
+          <h2 className="font-display text-[15px] font-semibold mb-2 flex items-center gap-2" style={{ color: '#0C4A5C' }}>
+            5. Advertência Operacional — Split Payment
+          </h2>
+          <div className="p-3 rounded-lg text-[13px] leading-relaxed text-justify" style={{ background: '#FBF0DE', border: '1px solid #D7B06F' }}>
+            Alertamos formalmente que, para os regimes Híbrido e Lucro Presumido, a parcela de CBS incidente sobre vendas
+            liquidadas por cartão ou PIX estará sujeita ao mecanismo de <em>split payment</em>, com retenção e recolhimento
+            automáticos do tributo federal no momento da transação eletrônica, antes da disponibilização do valor líquido à
+            empresa — em contraste com a guia única mensal do DAS no Simples Nacional Tradicional. Recomenda-se ajuste do
+            planejamento de fluxo de caixa para considerar a perda de capital de giro imediata, especialmente em operações
+            com margem reduzida ou prazo de giro de estoque elevado.
+          </div>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="font-display text-[15px] font-semibold mb-2" style={{ color: '#0C4A5C' }}>6. Recomendação Técnica Conclusiva</h2>
+          <p className="text-[13px] leading-relaxed text-justify">
+            Com base na análise técnica e nos cálculos demonstrados neste parecer, recomenda-se a formalização, junto à
+            Receita Federal do Brasil, do enquadramento no regime de <strong>{melhorLabel}</strong> para o exercício de 2027.
+            {' '}{prazoTexto}
+            {' '}Recomenda-se, ainda, o acompanhamento periódico das variáveis de faturamento, composição de fornecedores,
+            folha de pagamento e classificação de benefícios fiscais, dado que alterações relevantes nesses fatores podem
+            modificar a conclusão ora apresentada.
+          </p>
+        </section>
+
+        <div className="grid grid-cols-2 gap-10 mt-14 pt-4">
+          <div className="text-center">
+            <div style={{ borderTop: '1px solid #1C2A30', marginBottom: 6 }} />
+            <p className="text-[12.5px] font-medium">Germano Cunha Miranda</p>
+            <p className="text-[11.5px]" style={{ color: '#5A6B70' }}>Contador Responsável Técnico — CRC-AM-010043-O/9</p>
+          </div>
+          <div className="text-center">
+            <div style={{ borderTop: '1px solid #1C2A30', marginBottom: 6 }} />
+            <p className="text-[12.5px] font-medium">{d.razaoSocial || 'Representante Legal'}</p>
+            <p className="text-[11.5px]" style={{ color: '#5A6B70' }}>Representante Legal da Empresa</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================= MEMORIAL DESCRITIVO DOS CÁLCULOS (Anexo A) ============================= */
+function LinhaPartilha({ label, pct, base, destaque }) {
+  if (pct === undefined || pct === null) return null;
+  const valor = base * (pct / 100);
+  return (
+    <tr>
+      <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0', fontWeight: destaque ? 600 : 400 }}>{label}</td>
+      <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{pct.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</td>
+      <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0', fontWeight: destaque ? 600 : 400 }}>{fmtBRL2(valor)}</td>
+    </tr>
+  );
+}
+
+function MemorialCalculo({ d, calc, onClose }) {
+  const setorLabel = d.setor === 'comercio' ? 'comércio varejista' : d.setor === 'industria' ? 'atividade industrial' : 'prestação de serviços';
+  const faixa = calc.faixa;
+  const p = faixa.partilha;
+  const dasTabela = d.faturamentoMensal * calc.aliqEfetiva;
+  const reducaoPct = faixa.percCBS / 100;
+  const parcelaCofinsPis = dasTabela * reducaoPct;
+  const dasHibridoBase = dasTabela - parcelaCofinsPis;
+  const cbsLiquidoHibrido = Math.max(0, calc.cbsDebito - calc.cbsCredito);
+  const cppSeparado = calc.cppNoDAS ? 0 : CPP_ANEXO_IV_ALIQ * (d.folhaMensal + d.proLabore);
+  const cppSeparadoFolha = calc.cppNoDAS ? 0 : CPP_ANEXO_IV_ALIQ * d.folhaMensal;
+  const cppSeparadoProLabore = calc.cppNoDAS ? 0 : CPP_ANEXO_IV_ALIQ * d.proLabore;
+  const totalTradicional = dasTabela + cppSeparado;
+  const totalHibrido = dasHibridoBase + cbsLiquidoHibrido + cppSeparado;
+
+  const baseIRPJ = PRESUNCAO_IRPJ[d.setor] * d.faturamentoMensal;
+  const adicionalIRPJ = Math.max(0, baseIRPJ - 20000) * 0.10;
+  const irpj = baseIRPJ * 0.15 + adicionalIRPJ;
+  const baseCSLL = PRESUNCAO_CSLL[d.setor] * d.faturamentoMensal;
+  const csll = baseCSLL * 0.09;
+  const cppFolha = CPP_FOLHA_ALIQ * d.folhaMensal;
+  const cppProLabore = CPP_PROLABORE_ALIQ * d.proLabore;
+  const cppPresumido = cppFolha + cppProLabore;
+  let icmsDebito = 0, icmsCredito = 0, icmsLiquido = 0, iss = 0;
+  if (d.setor !== 'servicos') {
+    icmsDebito = (d.aliquotaEstMun / 100) * d.faturamentoMensal;
+    icmsCredito = (d.aliquotaEstMun / 100) * d.comprasMensais;
+    icmsLiquido = Math.max(0, icmsDebito - icmsCredito);
+  } else {
+    iss = (d.aliquotaEstMun / 100) * d.faturamentoMensal;
+  }
+  const cbsLiquidoPresumido = Math.max(0, calc.cbsDebito - calc.cbsCredito);
+  const totalPresumido = irpj + csll + cppPresumido + icmsLiquido + iss + cbsLiquidoPresumido;
+
+  const historicoCalc = useMemo(() => d.historico.map(mes => computeMesRegimes(d, mes)), [d]);
+
+  const thBase = { padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #D3DCDA', background: '#EEF3F1' };
+  const thLeft = { ...thBase, textAlign: 'left' };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto" style={{ background: 'rgba(10,18,20,0.55)' }}>
+      <div className="no-print sticky top-0 flex justify-between items-center px-5 py-3" style={{ background: 'var(--petroleo-dark)' }}>
+        <p className="text-white text-sm font-medium">Memorial Descritivo dos Cálculos — pré-visualização</p>
+        <div className="flex gap-2">
+          <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--emerald)', color: '#fff' }}>
+            <IconPrinter className="w-4 h-4" strokeWidth={2} /> Imprimir / Salvar PDF
+          </button>
+          <button onClick={onClose} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'rgba(255,255,255,0.12)', color: '#fff' }}>
+            <IconX className="w-4 h-4" strokeWidth={2} /> Fechar
+          </button>
+        </div>
+      </div>
+
+      <div id="memorial-print" className="mx-auto my-6 px-8 py-8" style={{ background: '#fff', color: '#1C2A30', fontFamily: "'IBM Plex Sans', sans-serif", maxWidth: '1100px' }}>
+        <div className="flex justify-between items-start pb-3" style={{ borderBottom: '2px solid #0C4A5C' }}>
+          <div>
+            <p className="font-display text-[17px] font-semibold" style={{ color: '#0C4A5C' }}>G&amp;M Contabilidade LTDA</p>
+            <p className="text-[11px]" style={{ color: '#5A6B70' }}>CNPJ 13.938.626/0001-29 · Germano Cunha Miranda · CRC-AM-010043-O/9</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px]" style={{ color: '#5A6B70' }}>Anexo A do Parecer Técnico</p>
+            <p className="font-mono text-[16px] font-semibold" style={{ color: '#0C4A5C' }}>Exercício 2027</p>
+          </div>
+        </div>
+
+        <h1 className="font-display text-[19px] font-semibold text-center mt-4 mb-1">Memorial Descritivo dos Cálculos</h1>
+        <p className="text-center text-[12px] mb-1" style={{ color: '#5A6B70' }}>
+          Memória de cálculo e partilha dos tributos — {d.razaoSocial || '—'} · CNPJ {d.cnpj || '—'} · {setorLabel} · Anexo {calc.nomeAnexo} (LC nº 123/2006)
+        </p>
+        <p className="text-center text-[11px] mb-5" style={{ color: '#5A6B70' }}>
+          RBT12: {fmtBRL2(d.rbt12)} · Faixa aplicável: {faixa.min === 0 ? 'até' : 'de'} {fmtBRL2(faixa.min)} {faixa.max < LIMITE_SIMPLES ? `a ${fmtBRL2(faixa.max)}` : '(6ª faixa)'} · Faturamento mensal-base: {fmtBRL2(d.faturamentoMensal)}
+        </p>
+
+        {/* ============ A) SIMPLES NACIONAL TRADICIONAL ============ */}
+        <section className="mb-5">
+          <h2 className="font-display text-[14px] font-semibold mb-1.5 px-2 py-1" style={{ color: '#fff', background: '#0C4A5C' }}>A) Simples Nacional Tradicional</h2>
+          <p className="text-[11.5px] leading-relaxed mb-2">
+            Alíquota efetiva = (RBT12 × Alíquota nominal − Parcela a deduzir) / RBT12 = ({fmtBRL2(d.rbt12)} × {(faixa.aliq * 100).toFixed(2)}% − {fmtBRL2(faixa.pd)}) / {fmtBRL2(d.rbt12)} = <strong>{fmtPct(calc.aliqEfetiva)}</strong>
+          </p>
+          <p className="text-[11.5px] leading-relaxed mb-2">
+            DAS mensal (tabela) = Faturamento × Alíquota efetiva = {fmtBRL2(d.faturamentoMensal)} × {fmtPct(calc.aliqEfetiva)} = <strong>{fmtBRL2(dasTabela)}</strong>
+          </p>
+          <table className="w-full text-[11px] border-collapse mb-2">
+            <thead><tr><th style={thLeft}>Partilha do DAS (Percentual de Repartição — Resolução CGSN nº 94/2011)</th><th style={thBase}>%</th><th style={thBase}>Valor (R$)</th></tr></thead>
+            <tbody>
+              <LinhaPartilha label="IRPJ" pct={p.irpj} base={dasTabela} />
+              <LinhaPartilha label="CSLL" pct={p.csll} base={dasTabela} />
+              <LinhaPartilha label="COFINS" pct={p.cofins} base={dasTabela} />
+              <LinhaPartilha label="PIS/Pasep" pct={p.pis} base={dasTabela} />
+              {p.cpp > 0 && <LinhaPartilha label="CPP (previdenciário)" pct={p.cpp} base={dasTabela} />}
+              {p.ipi !== undefined && <LinhaPartilha label="IPI" pct={p.ipi} base={dasTabela} />}
+              <LinhaPartilha label={p.labelIcmsIss} pct={p.icmsOuIss || null} base={dasTabela} />
+              <tr style={{ background: '#EEF3F1' }}>
+                <td className="py-1 px-2 font-semibold">Total do DAS (tabela)</td>
+                <td className="py-1 px-2 text-right font-mono font-semibold">100,00%</td>
+                <td className="py-1 px-2 text-right font-mono font-semibold">{fmtBRL2(dasTabela)}</td>
+              </tr>
+              {!calc.cppNoDAS && (
+                <tr>
+                  <td className="py-1 px-2">
+                    CPP patronal (recolhida à parte, fora do DAS neste anexo — Anexo IV, alíquota única de 20%, sem RAT/terceiros) — salários: 20% × {fmtBRL2(d.folhaMensal)} = {fmtBRL2(cppSeparadoFolha)}; pró-labore: 20% × {fmtBRL2(d.proLabore)} = {fmtBRL2(cppSeparadoProLabore)}
+                  </td>
+                  <td className="py-1 px-2 text-right font-mono">—</td>
+                  <td className="py-1 px-2 text-right font-mono">{fmtBRL2(cppSeparado)}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          <p className="text-[12px] text-right"><strong>Total mensal — Simples Tradicional: {fmtBRL2(totalTradicional)} &nbsp;|&nbsp; Alíquota efetiva sobre faturamento: {fmtPct(d.faturamentoMensal > 0 ? totalTradicional / d.faturamentoMensal : 0)}</strong></p>
+        </section>
+
+        {/* ============ B) SIMPLES NACIONAL HÍBRIDO ============ */}
+        <section className="mb-5">
+          <h2 className="font-display text-[14px] font-semibold mb-1.5 px-2 py-1" style={{ color: '#fff', background: '#0C4A5C' }}>B) Simples Nacional Híbrido</h2>
+          <p className="text-[11.5px] leading-relaxed mb-2">
+            Do DAS integral de {fmtBRL2(dasTabela)}, retira-se a parcela de Cofins + PIS/Pasep da faixa ({fmtPct(reducaoPct)} = {fmtBRL2(parcelaCofinsPis)}),
+            que passa a ser apurada fora do DAS, no regime não cumulativo da CBS. DAS reduzido = {fmtBRL2(dasTabela)} − {fmtBRL2(parcelaCofinsPis)} = <strong>{fmtBRL2(dasHibridoBase)}</strong>
+          </p>
+          <table className="w-full text-[11px] border-collapse mb-2">
+            <thead><tr><th style={thLeft}>Partilha do DAS reduzido (mesmos valores em R$ do Tradicional, exceto Cofins/PIS)</th><th style={thBase}>%</th><th style={thBase}>Valor (R$)</th></tr></thead>
+            <tbody>
+              <LinhaPartilha label="IRPJ" pct={p.irpj} base={dasTabela} />
+              <LinhaPartilha label="CSLL" pct={p.csll} base={dasTabela} />
+              {p.cpp > 0 && <LinhaPartilha label="CPP (previdenciário)" pct={p.cpp} base={dasTabela} />}
+              {p.ipi !== undefined && <LinhaPartilha label="IPI" pct={p.ipi} base={dasTabela} />}
+              <LinhaPartilha label={p.labelIcmsIss} pct={p.icmsOuIss || null} base={dasTabela} />
+              <tr>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0', color: '#0C4A5C', fontStyle: 'italic' }}>COFINS + PIS/Pasep — sai do DAS e passa a ser apurado como CBS (linha abaixo)</td>
+                <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0', color: '#0C4A5C', fontStyle: 'italic' }}>−{fmtPct(reducaoPct)}</td>
+                <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0', color: '#0C4A5C', fontStyle: 'italic' }}>−{fmtBRL2(parcelaCofinsPis)}</td>
+              </tr>
+              <tr style={{ background: '#EEF3F1' }}>
+                <td className="py-1 px-2 font-semibold">Subtotal — DAS reduzido</td>
+                <td className="py-1 px-2 text-right font-mono font-semibold">{(100 - faixa.percCBS).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}%</td>
+                <td className="py-1 px-2 text-right font-mono font-semibold">{fmtBRL2(dasHibridoBase)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="text-[11.5px] leading-relaxed mb-1">
+            CBS apurada fora do DAS: Débito ({fmtPct(calc.aliqCBSVendas)} sobre vendas) = {fmtBRL2(calc.cbsDebito)} − Crédito (8,80% sobre compras elegíveis) = {fmtBRL2(calc.cbsCredito)} → CBS líquida = <strong>{fmtBRL2(cbsLiquidoHibrido)}</strong>
+          </p>
+          {!calc.cppNoDAS && (
+            <p className="text-[11.5px] leading-relaxed mb-1">
+              CPP patronal recolhida à parte (Anexo IV, alíquota única de 20%, sem RAT/terceiros) — salários: 20% × {fmtBRL2(d.folhaMensal)} = {fmtBRL2(cppSeparadoFolha)}; pró-labore: 20% × {fmtBRL2(d.proLabore)} = {fmtBRL2(cppSeparadoProLabore)}; soma: <strong>{fmtBRL2(cppSeparado)}</strong>
+            </p>
+          )}
+          <p className="text-[12px] text-right mt-2"><strong>Total mensal — Simples Híbrido: {fmtBRL2(totalHibrido)} &nbsp;|&nbsp; Alíquota efetiva sobre faturamento: {fmtPct(d.faturamentoMensal > 0 ? totalHibrido / d.faturamentoMensal : 0)}</strong></p>
+        </section>
+
+        {/* ============ C) LUCRO PRESUMIDO ============ */}
+        <section className="mb-5">
+          <h2 className="font-display text-[14px] font-semibold mb-1.5 px-2 py-1" style={{ color: '#fff', background: '#0C4A5C' }}>C) Lucro Presumido</h2>
+          <table className="w-full text-[11px] border-collapse mb-2">
+            <thead><tr><th style={thLeft}>Tributo</th><th style={thLeft}>Memória de cálculo</th><th style={thBase}>Valor (R$)</th></tr></thead>
+            <tbody>
+              <tr>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>IRPJ</td>
+                <td className="py-1 px-2 font-mono" style={{ borderBottom: '1px solid #EEF1F0', fontSize: '10.5px' }}>
+                  Base = {(PRESUNCAO_IRPJ[d.setor] * 100).toFixed(0)}% × {fmtBRL2(d.faturamentoMensal)} = {fmtBRL2(baseIRPJ)} · IRPJ = 15% × base{adicionalIRPJ > 0 ? ' + 10% × (base − 20.000)' : ''} = {fmtBRL2(baseIRPJ * 0.15)}{adicionalIRPJ > 0 ? ` + ${fmtBRL2(adicionalIRPJ)}` : ''}
+                </td>
+                <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(irpj)}</td>
+              </tr>
+              <tr>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>CSLL</td>
+                <td className="py-1 px-2 font-mono" style={{ borderBottom: '1px solid #EEF1F0', fontSize: '10.5px' }}>
+                  Base = {(PRESUNCAO_CSLL[d.setor] * 100).toFixed(0)}% × {fmtBRL2(d.faturamentoMensal)} = {fmtBRL2(baseCSLL)} · CSLL = 9% × base
+                </td>
+                <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(csll)}</td>
+              </tr>
+              <tr>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>CPP patronal</td>
+                <td className="py-1 px-2 font-mono" style={{ borderBottom: '1px solid #EEF1F0', fontSize: '10.5px' }}>
+                  Sobre salários: 28,8% × {fmtBRL2(d.folhaMensal)} = {fmtBRL2(cppFolha)} &nbsp;+&nbsp; Sobre pró-labore: 20% × {fmtBRL2(d.proLabore)} = {fmtBRL2(cppProLabore)} &nbsp;=&nbsp; Soma: {fmtBRL2(cppFolha)} + {fmtBRL2(cppProLabore)}
+                </td>
+                <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(cppPresumido)}</td>
+              </tr>
+              {d.setor !== 'servicos' ? (
+                <tr>
+                  <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>ICMS</td>
+                  <td className="py-1 px-2 font-mono" style={{ borderBottom: '1px solid #EEF1F0', fontSize: '10.5px' }}>
+                    Débito = {d.aliquotaEstMun}% × {fmtBRL2(d.faturamentoMensal)} = {fmtBRL2(icmsDebito)} − Crédito = {d.aliquotaEstMun}% × {fmtBRL2(d.comprasMensais)} = {fmtBRL2(icmsCredito)}
+                  </td>
+                  <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(icmsLiquido)}</td>
+                </tr>
+              ) : (
+                <tr>
+                  <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>ISS</td>
+                  <td className="py-1 px-2 font-mono" style={{ borderBottom: '1px solid #EEF1F0', fontSize: '10.5px' }}>
+                    {d.aliquotaEstMun}% × {fmtBRL2(d.faturamentoMensal)} (cumulativo, sem crédito)
+                  </td>
+                  <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(iss)}</td>
+                </tr>
+              )}
+              <tr>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>CBS</td>
+                <td className="py-1 px-2 font-mono" style={{ borderBottom: '1px solid #EEF1F0', fontSize: '10.5px' }}>
+                  Débito = {fmtPct(calc.aliqCBSVendas)} × {fmtBRL2(d.faturamentoMensal)} = {fmtBRL2(calc.cbsDebito)} − Crédito = 8,8% × {fmtBRL2(d.comprasMensais * d.pctFornecedorRegimeNormal / 100)} = {fmtBRL2(calc.cbsCredito)}
+                </td>
+                <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(cbsLiquidoPresumido)}</td>
+              </tr>
+              <tr style={{ background: '#EEF3F1' }}>
+                <td className="py-1 px-2 font-semibold" colSpan="2">Total mensal — Lucro Presumido</td>
+                <td className="py-1 px-2 text-right font-mono font-semibold">{fmtBRL2(totalPresumido)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="text-[12px] text-right"><strong>Alíquota efetiva sobre faturamento: {fmtPct(d.faturamentoMensal > 0 ? totalPresumido / d.faturamentoMensal : 0)}</strong></p>
+        </section>
+
+        {/* ============ D) ALÍQUOTAS EFETIVAS MÊS A MÊS ============ */}
+        <section className="mb-4">
+          <h2 className="font-display text-[14px] font-semibold mb-1.5 px-2 py-1" style={{ color: '#fff', background: '#0C4A5C' }}>D) Alíquota Efetiva por Regime — Mês a Mês (6 Competências)</h2>
+          <table className="w-full text-[11px] border-collapse">
+            <thead>
+              <tr>
+                <th style={thLeft}>Mês</th>
+                <th style={thBase}>Faturamento</th>
+                <th style={thBase}>Trad. — R$ / % efetiva</th>
+                <th style={thBase}>Híbrido — R$ / % efetiva</th>
+                <th style={thBase}>Presumido — R$ / % efetiva</th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.historico.map((mes, i) => {
+                const r = historicoCalc[i];
+                const comp = d.historicoCompetencias[i] ? formatCompetencia(d.historicoCompetencias[i]) : null;
+                return (
+                  <tr key={i}>
+                    <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>Mês {i + 1}{comp ? ` (${comp})` : ''}</td>
+                    <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(mes.faturamento)}</td>
+                    {['tradicional', 'hibrido', 'presumido'].map(k => (
+                      <td key={k} className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0', fontWeight: k === r.melhor ? 600 : 400, color: k === r.melhor ? '#0E8F62' : undefined }}>
+                        {fmtBRL2(r[k])} <span style={{ color: '#5A6B70' }}>({fmtPct(r.efetivas[k])})</span>
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </section>
+
+        <p className="text-[10.5px] mt-4" style={{ color: '#5A6B70' }}>
+          Documento de apoio ao Parecer Técnico de Enquadramento Tributário — Exercício 2027. Os percentuais de partilha
+          reproduzem a Resolução CGSN nº 94/2011 (Anexos I a V, LC nº 123/2006). A alíquota de referência da CBS (8,8%)
+          está sujeita a fixação definitiva por Resolução do Senado Federal (art. 349, LC nº 214/2025).
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================= ANEXO — NCMs PARA CONFERÊNCIA (Anexo B) ============================= */
+function AnexoNCM({ d, onClose }) {
+  const categoriaLabel = { cesta: 'Cesta Básica (alíquota zero)', reduzido60: 'Redução 60% (3,52%)', padrao: 'Padrão (8,8%)' };
+  const categoriaCor = { cesta: '#0E8F62', reduzido60: '#5B4B9E', padrao: '#5A6B70' };
+
+  const itensAnotados = useMemo(() => {
+    return d.ncmDetalhado.map(item => {
+      const sugestao = sugerirNCM(item.descricao);
+      const temBeneficio = item.categoria === 'cesta' || item.categoria === 'reduzido60';
+      // Suspeito: tem benefício fiscal E a descrição bate com um termo do dicionário de ferragem/moto —
+      // ou seja, o produto claramente não é alimento/medicamento/insumo agropecuário, mas foi classificado como tal.
+      const suspeito = temBeneficio && !!sugestao;
+      const prioridade = suspeito ? 2 : temBeneficio ? 1 : 0;
+      return { ...item, sugestao, temBeneficio, suspeito, prioridade };
+    }).sort((a, b) => b.prioridade - a.prioridade || b.valorTotal - a.valorTotal);
+  }, [d.ncmDetalhado]);
+
+  const totalGeral = d.ncmDetalhado.reduce((s, it) => s + it.valorTotal, 0);
+  const suspeitos = itensAnotados.filter(it => it.suspeito);
+  const beneficiados = itensAnotados.filter(it => it.temBeneficio);
+  const totalSuspeitos = suspeitos.reduce((s, it) => s + it.valorTotal, 0);
+  const totalBeneficiados = beneficiados.reduce((s, it) => s + it.valorTotal, 0);
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto" style={{ background: 'rgba(10,18,20,0.55)' }}>
+      <div className="no-print sticky top-0 flex justify-between items-center px-5 py-3" style={{ background: 'var(--petroleo-dark)' }}>
+        <p className="text-white text-sm font-medium">Anexo — Lista de NCMs para Conferência — pré-visualização</p>
+        <div className="flex gap-2">
+          <button onClick={() => window.print()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'var(--emerald)', color: '#fff' }}>
+            <IconPrinter className="w-4 h-4" strokeWidth={2} /> Imprimir / Salvar PDF
+          </button>
+          <button onClick={onClose} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'rgba(255,255,255,0.12)', color: '#fff' }}>
+            <IconX className="w-4 h-4" strokeWidth={2} /> Fechar
+          </button>
+        </div>
+      </div>
+
+      <div id="ncm-print" className="mx-auto my-6 px-8 py-8" style={{ background: '#fff', color: '#1C2A30', fontFamily: "'IBM Plex Sans', sans-serif", maxWidth: '1200px' }}>
+        <div className="flex justify-between items-start pb-3" style={{ borderBottom: '2px solid #0C4A5C' }}>
+          <div>
+            <p className="font-display text-[17px] font-semibold" style={{ color: '#0C4A5C' }}>G&amp;M Contabilidade LTDA</p>
+            <p className="text-[11px]" style={{ color: '#5A6B70' }}>CNPJ 13.938.626/0001-29 · Germano Cunha Miranda · CRC-AM-010043-O/9</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px]" style={{ color: '#5A6B70' }}>Anexo B do Parecer Técnico</p>
+            <p className="font-mono text-[16px] font-semibold" style={{ color: '#0C4A5C' }}>Exercício 2027</p>
+          </div>
+        </div>
+
+        <h1 className="font-display text-[19px] font-semibold text-center mt-4 mb-1">Lista de NCMs para Conferência</h1>
+        <p className="text-center text-[12px] mb-4" style={{ color: '#5A6B70' }}>
+          {d.razaoSocial || '—'} · CNPJ {d.cnpj || '—'} · NCMs identificados nos XMLs de saída processados
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          <div className="rounded-lg p-3" style={{ background: '#F8E9E9', border: '1px solid #D9AFAF' }}>
+            <p className="text-[10.5px]" style={{ color: '#A23B3B' }}>Itens com possível erro de classificação</p>
+            <p className="font-mono text-[15px] font-semibold" style={{ color: '#A23B3B' }}>{suspeitos.length} item(ns) · {fmtBRL2(totalSuspeitos)}</p>
+          </div>
+          <div className="rounded-lg p-3" style={{ background: '#ECE9F7', border: '1px solid #C9C0E8' }}>
+            <p className="text-[10.5px]" style={{ color: '#5B4B9E' }}>Total classificado com benefício fiscal</p>
+            <p className="font-mono text-[15px] font-semibold" style={{ color: '#5B4B9E' }}>{beneficiados.length} item(ns) · {fmtBRL2(totalBeneficiados)}</p>
+          </div>
+          <div className="rounded-lg p-3" style={{ background: '#EEF3F1', border: '1px solid #C9D6D2' }}>
+            <p className="text-[10.5px]" style={{ color: '#5A6B70' }}>Total geral de itens / valor</p>
+            <p className="font-mono text-[15px] font-semibold">{itensAnotados.length} item(ns) · {fmtBRL2(totalGeral)}</p>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-lg text-[12px] leading-relaxed text-justify mb-4" style={{ background: '#FBF0DE', border: '1px solid #D7B06F' }}>
+          A classificação de benefícios (Cesta Básica, redução de 60% ou alíquota padrão) exibida abaixo é <strong>gerada
+          automaticamente</strong> por comparação do NCM de cada item com uma tabela de referência interna do escritório
+          — não é uma consulta oficial à Receita Federal, e não é exaustiva. A coluna "Sugestão pela descrição" também é
+          automática, por palavras-chave do próprio texto do produto — não substitui a classificação fiscal correta, que
+          deve ser feita pelo cliente e/ou pelo contador responsável. Itens marcados com <strong style={{ color: '#A23B3B' }}>⚠ possível erro</strong> foram
+          classificados com benefício fiscal apesar de a descrição do produto sugerir um item de natureza diferente
+          (ex.: ferragem ou peça de motocicleta classificada como alimento) — confira estes primeiro.
+        </div>
+
+        <table className="w-full text-[10.5px] border-collapse">
+          <thead>
+            <tr style={{ background: '#EEF3F1' }}>
+              <th className="py-1.5 px-2 text-left" style={{ borderBottom: '1px solid #D3DCDA' }}>Alerta</th>
+              <th className="py-1.5 px-2 text-left" style={{ borderBottom: '1px solid #D3DCDA' }}>NCM (no XML)</th>
+              <th className="py-1.5 px-2 text-left" style={{ borderBottom: '1px solid #D3DCDA' }}>Descrição do item (conforme XML do cliente)</th>
+              <th className="py-1.5 px-2 text-left" style={{ borderBottom: '1px solid #D3DCDA' }}>Classificação automática</th>
+              <th className="py-1.5 px-2 text-left" style={{ borderBottom: '1px solid #D3DCDA' }}>Sugestão de NCM pela descrição</th>
+              <th className="py-1.5 px-2 text-right" style={{ borderBottom: '1px solid #D3DCDA' }}>Ocorrências</th>
+              <th className="py-1.5 px-2 text-right" style={{ borderBottom: '1px solid #D3DCDA' }}>Valor total (R$)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {itensAnotados.map((item, i) => (
+              <tr key={i} style={item.suspeito ? { background: '#FBF0F0' } : {}}>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>
+                  {item.suspeito ? <span style={{ color: '#A23B3B', fontWeight: 600 }}>⚠ possível erro</span>
+                    : item.temBeneficio ? <span style={{ color: '#5B4B9E' }}>confira</span> : ''}
+                </td>
+                <td className="py-1 px-2 font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{item.ncm}</td>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>{item.descricao || '—'}</td>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0', color: categoriaCor[item.categoria] }}>{categoriaLabel[item.categoria] || item.categoria}</td>
+                <td className="py-1 px-2" style={{ borderBottom: '1px solid #EEF1F0' }}>
+                  {item.sugestao ? <span><span className="font-mono">{item.sugestao.ncm}</span> — {item.sugestao.desc}</span> : <span style={{ color: '#5A6B70' }}>—</span>}
+                </td>
+                <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{item.ocorrencias}</td>
+                <td className="py-1 px-2 text-right font-mono" style={{ borderBottom: '1px solid #EEF1F0' }}>{fmtBRL2(item.valorTotal)}</td>
+              </tr>
+            ))}
+            <tr style={{ background: '#EEF3F1' }}>
+              <td className="py-1.5 px-2 font-semibold" colSpan="6">Total</td>
+              <td className="py-1.5 px-2 text-right font-mono font-semibold">{fmtBRL2(totalGeral)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p className="text-[10.5px] mt-4" style={{ color: '#5A6B70' }}>
+          Documento gerado a partir dos itens de venda constantes nos XMLs de NF-e/NFC-e processados pelo aplicativo,
+          para uso exclusivo de conferência interna pelo cliente e pelo contador responsável. Não constitui documento
+          fiscal nem substitui a nota fiscal original.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================= APP ============================= */
+/* ============================= CARTEIRA DE CLIENTES (localStorage) ============================= */
+const LS_KEY = 'hub_tributario_clientes_2027';
+const ANEXO_SEGMENTO = { I: 'Comércio', II: 'Indústria', III: 'Serviços', IV: 'Serviços', V: 'Serviços' };
+
+function lsLoadCarteira() {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return { list: [], erro: 'localStorage indisponível neste navegador/contexto.' };
+    const raw = window.localStorage.getItem(LS_KEY);
+    if (!raw) return { list: [], erro: null };
+    const parsed = JSON.parse(raw);
+    return { list: Array.isArray(parsed) ? parsed : [], erro: null };
+  } catch (e) { return { list: [], erro: 'Falha ao ler o histórico local: ' + (e && e.message ? e.message : String(e)) }; }
+}
+function lsSaveCarteira(list) {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return { ok: false, erro: 'localStorage indisponível neste navegador/contexto (comum ao abrir o arquivo direto do computador, sem servidor — use o link publicado).' };
+    window.localStorage.setItem(LS_KEY, JSON.stringify(list));
+    return { ok: true, erro: null };
+  } catch (e) { return { ok: false, erro: 'Falha ao salvar: ' + (e && e.message ? e.message : String(e)) }; }
+}
+// Monta o registro persistido de um cliente a partir do estado atual (d) e do resultado do cálculo (calc).
+function buildClienteRecord(d, calc) {
+  const cnpjDigits = d.cnpj ? d.cnpj.replace(/\D/g, '') : '';
+  const id = (cnpjDigits && cnpjDigits.length === 14) ? cnpjDigits : `novo-${Date.now()}`;
+  const regimes = calc.regimes;
+  const keys = ['tradicional', 'hibrido', 'presumido'];
+  let pior = keys[0];
+  keys.forEach(k => { if (regimes[k].anual > regimes[pior].anual) pior = k; });
+  const economiaAnual = regimes[pior].anual - regimes[calc.melhor].anual;
+  const parecerResumo = `Regime recomendado: ${regimes[calc.melhor].label}. Economia anual estimada: ${fmtBRL(economiaAnual)} `
+    + `em relação a ${regimes[pior].label}. Enquadramento: Anexo ${calc.nomeAnexo} (LC nº 123/2006), setor ${ANEXO_SEGMENTO[calc.nomeAnexo] || d.setor}. `
+    + `Análise gerada em ${new Date().toLocaleString('pt-BR')}.`;
+  return {
+    id,
+    cnpj: d.cnpj, razaoSocial: d.razaoSocial, nomeFantasia: d.razaoSocial,
+    cnae: (d.beneficios && d.beneficios.servicos) ? (d.beneficios.servicos.cnae || null) : null,
+    anexo: calc.nomeAnexo, setor: d.setor, uf: d.uf, municipioUF: d.municipioUF,
+    dataAnalise: Date.now(),
+    historico: d.historico, historicoCompetencias: d.historicoCompetencias,
+    resultados: {
+      tradicional: { mensal: regimes.tradicional.mensal, anual: regimes.tradicional.anual },
+      hibrido: { mensal: regimes.hibrido.mensal, anual: regimes.hibrido.anual },
+      presumido: { mensal: regimes.presumido.mensal, anual: regimes.presumido.anual },
+      melhor: calc.melhor, economiaAnual,
+    },
+    parecerResumo,
+    d,
+  };
+}
+
+function exemploPorSetor(setor) {
+  return setor === 'industria' ? EXEMPLO_INDUSTRIA : setor === 'servicos' ? EXEMPLO_SERVICOS : EXEMPLO_COMERCIO;
+}
+
+function BLANK_STATE(setor) {
+  return {
+    setor, razaoSocial: '', cnpj: '', municipioUF: '', uf: 'AM', cnpjMestreLocked: false,
+    faturamentoMensal: 0, rbt12: 0, comprasMensais: 0, pctFornecedorRegimeNormal: 0,
+    folhaMensal: 0, proLabore: 0, aliquotaEstMun: setor === 'servicos' ? 3 : 20, pctB2B: 0,
+    anexoServicosForcado: null, anexoDetectadoPGDAS: null, ncmDetalhado: [],
+    beneficios: { comercio: { cestaPct: 0, reduzido60Pct: 0 }, servicos: { cnae: '', categoria: 'padrao', aliqPersonalizada: 8.8 } },
+    historico: [0, 1, 2, 3, 4, 5].map(() => ({ faturamento: 0, comprasRegimeNormal: 0, folha: 0 })),
+    historicoCompetencias: [null, null, null, null, null, null],
+  };
+}
+
+function App() {
+  const [d, setD] = useState(EXEMPLO_COMERCIO);
+  const [showParecer, setShowParecer] = useState(false);
+  const [showMemorial, setShowMemorial] = useState(false);
+  const [showNcmAnexo, setShowNcmAnexo] = useState(false);
+  const [resetCounter, setResetCounter] = useState(0);
+  const [db, setDb] = useState(null);
+  const [dbStatus, setDbStatus] = useState('checking');
+  const [carteira, setCarteira] = useState([]);
+  const [lsErro, setLsErro] = useState(null);
+  const [downloadsApi, setDownloadsApi] = useState(null);
+  const [toast, setToast] = useState(null);
+  const toastTimerRef = useRef(null);
+  const importInputRef = useRef(null);
+  const set = (patch) => setD(prev => ({ ...prev, ...patch }));
+
+  const showToast = useCallback((msg) => {
+    setToast(msg);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3400);
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    if (typeof window !== 'undefined' && window.claude && typeof window.claude.use === 'function') {
+      window.claude.use('db').then(dbApi => {
+        if (!alive) return;
+        setDb(dbApi);
+        setDbStatus(dbApi ? 'ready' : 'unavailable');
+      }).catch(() => { if (alive) setDbStatus('unavailable'); });
+      window.claude.use('downloads').then(api => { if (alive) setDownloadsApi(api); }).catch(() => {});
+    } else {
+      setDbStatus('unavailable');
+    }
+    return () => { alive = false; };
+  }, []);
+
+  // Carteira de clientes: usa o banco de dados do Claude quando disponível (não depende do localStorage do
+  // navegador, então não é afetado por bloqueios de "Tracking Prevention"/cookies de terceiros dentro do
+  // quadro do artefato). Só recorre ao localStorage do navegador quando o app roda fora do Claude (ex.: arquivo
+  // aberto direto num VPS, sem essa capacidade disponível).
+  useEffect(() => {
+    if (db) {
+      const unsub = db.collection('clientes').orderBy('atualizadoEm', 'desc').limit(50).onSnapshot(
+        (snap) => { setCarteira(snap.docs.map(doc => ({ id: doc.id, ...(doc.data() || {}) }))); setLsErro(null); },
+        (err) => { setLsErro('Falha ao carregar clientes do banco de dados do Claude: ' + (err && err.message ? err.message : String(err))); }
+      );
+      return () => unsub();
+    }
+    if (dbStatus === 'unavailable') {
+      const r = lsLoadCarteira();
+      setCarteira(r.list);
+      setLsErro(r.erro);
+    }
+  }, [db, dbStatus]);
+
+  const resetEmpresa = () => {
+    if (!window.confirm('Limpar todos os dados da empresa atual e iniciar um novo cliente? Esta ação não pode ser desfeita.')) return;
+    setD(prev => BLANK_STATE(prev.setor));
+    setResetCounter(c => c + 1);
+    setShowParecer(false);
+  };
+
+  const applyFromDocs = useCallback((patch) => {
+    setD(prev => {
+      const { beneficios, historicoUpdate, ...rest } = patch;
+      const next = { ...prev, ...rest };
+      if (beneficios) {
+        next.beneficios = {
+          comercio: { ...prev.beneficios.comercio, ...(beneficios.comercio || {}) },
+          servicos: { ...prev.beneficios.servicos, ...(beneficios.servicos || {}) },
+        };
+      }
+      if (historicoUpdate && historicoUpdate.competencias.length > 0) {
+        const { competencias, porMes } = historicoUpdate;
+        const startIdx = Math.max(0, 6 - competencias.length);
+        const newHistorico = [...prev.historico];
+        const newComp = [...prev.historicoCompetencias];
+        competencias.forEach((c, idx) => {
+          const slot = startIdx + idx;
+          if (slot >= 0 && slot < 6) { newHistorico[slot] = porMes[idx]; newComp[slot] = c; }
+        });
+        next.historico = newHistorico;
+        next.historicoCompetencias = newComp;
+      }
+      return next;
+    });
+  }, []);
+
+  const setBeneficiosComercio = (patch) => setD(prev => ({ ...prev, beneficios: { ...prev.beneficios, comercio: { ...prev.beneficios.comercio, ...patch } } }));
+  const setBeneficiosServicos = (patch) => setD(prev => ({ ...prev, beneficios: { ...prev.beneficios, servicos: { ...prev.beneficios.servicos, ...patch } } }));
+  const setHistoricoMes = (idx, patch) => setD(prev => {
+    const historico = prev.historico.map((m, i) => i === idx ? { ...m, ...patch } : m);
+    return { ...prev, historico };
+  });
+
+  const calc = useMemo(() => computeRegimes(d), [d]);
+  const regimes = calc.regimes;
+  const ordenados = ['tradicional', 'hibrido', 'presumido'].slice().sort((a, b) => regimes[a].mensal - regimes[b].mensal);
+  const pior = ordenados[ordenados.length - 1];
+  const economiaAnual = regimes[pior].anual - regimes[calc.melhor].anual;
+  const isComercio = d.setor === 'comercio';
+  const isIndustria = d.setor === 'industria';
+  const isServicos = d.setor === 'servicos';
+
+  // Autosave (debounced) — grava/atualiza o cliente atual assim que o CNPJ mestre está fixado. Usa o banco do
+  // Claude quando disponível; cai para o localStorage do navegador só quando roda fora do Claude.
+  useEffect(() => {
+    if (!d.cnpjMestreLocked || !d.cnpj) return;
+    const t = setTimeout(async () => {
+      const record = buildClienteRecord(d, calc);
+      if (db) {
+        try {
+          await db.doc(`clientes/${record.id}`).set(record);
+          setLsErro(null);
+          showToast(`Dados da empresa ${d.razaoSocial || d.cnpj} salvos com sucesso.`);
+        } catch (e) {
+          showToast(`⚠ Não foi possível salvar: ${e && e.message ? e.message : String(e)}`);
+        }
+        return;
+      }
+      setCarteira(prev => {
+        const idx = prev.findIndex(c => c.id === record.id);
+        const next = idx >= 0 ? prev.map((c, i) => (i === idx ? record : c)) : [...prev, record];
+        const resultado = lsSaveCarteira(next);
+        setLsErro(resultado.ok ? null : resultado.erro);
+        if (resultado.ok) {
+          showToast(`Dados da empresa ${d.razaoSocial || d.cnpj} salvos com sucesso no histórico local.`);
+        } else {
+          showToast(`⚠ Não foi possível salvar no histórico local: ${resultado.erro}`);
+        }
+        return next;
+      });
+    }, 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line
+  }, [d, calc, db]);
+
+  const activeClienteId = useMemo(() => {
+    const digits = d.cnpj ? d.cnpj.replace(/\D/g, '') : '';
+    return carteira.some(c => c.id === digits) ? digits : '';
+  }, [d.cnpj, carteira]);
+
+  const temDadosNaoSalvos = (dd) => !dd.cnpjMestreLocked && !!(dd.razaoSocial || dd.cnpj || dd.faturamentoMensal > 0 || dd.rbt12 > 0);
+
+  const novoCliente = () => {
+    if (temDadosNaoSalvos(d) && !window.confirm('Os dados preenchidos ainda não foram salvos (o CNPJ mestre ainda não foi definido para esta empresa). Iniciar um novo cliente agora vai descartá-los. Deseja continuar?')) return;
+    setD(prev => BLANK_STATE(prev.setor));
+    setResetCounter(c => c + 1);
+    setShowParecer(false);
+  };
+
+  const selecionarCliente = (id) => {
+    if (!id) { novoCliente(); return; }
+    if (temDadosNaoSalvos(d) && !window.confirm('Os dados preenchidos ainda não foram salvos. Trocar de cliente agora vai descartá-los. Deseja continuar?')) return;
+    const rec = carteira.find(c => c.id === id);
+    if (!rec || !rec.d) return;
+    setD(rec.d);
+    setResetCounter(c => c + 1);
+    setShowParecer(false);
+  };
+
+  const excluirClienteAtivo = async () => {
+    const rec = carteira.find(c => c.id === activeClienteId);
+    if (!rec) { showToast('Nenhum cliente salvo selecionado para excluir.'); return; }
+    if (!window.confirm(`Excluir permanentemente "${rec.razaoSocial || rec.cnpj}" do histórico? Esta ação não pode ser desfeita.`)) return;
+    if (db) {
+      try {
+        await db.doc(`clientes/${rec.id}`).delete();
+        novoCliente();
+        showToast(`Cliente "${rec.razaoSocial || rec.cnpj}" excluído.`);
+      } catch (e) {
+        showToast(`⚠ Falha ao excluir: ${e && e.message ? e.message : String(e)}`);
+      }
+      return;
+    }
+    let resultado = null;
+    setCarteira(prev => {
+      const next = prev.filter(c => c.id !== rec.id);
+      resultado = lsSaveCarteira(next);
+      return next;
+    });
+    novoCliente();
+    if (resultado && !resultado.ok) { setLsErro(resultado.erro); showToast(`⚠ Cliente removido da tela, mas houve falha ao salvar: ${resultado.erro}`); }
+    else { setLsErro(null); showToast(`Cliente "${rec.razaoSocial || rec.cnpj}" excluído do histórico local.`); }
+  };
+
+  const exportarBackup = async () => {
+    if (!downloadsApi) { showToast('Exportação de arquivo não disponível nesta visualização.'); return; }
+    if (!carteira.length) { showToast('Nenhum cliente salvo para exportar.'); return; }
+    const payload = JSON.stringify(carteira, null, 2);
+    try {
+      await downloadsApi.save({ filename: `hub_tributario_clientes_2027_backup_${new Date().toISOString().slice(0, 10)}.json`, data: payload });
+      showToast('Backup de todos os clientes exportado com sucesso.');
+    } catch (e) {
+      if (e && e.code === 'declined') return;
+      showToast('Não foi possível exportar o backup agora.');
+    }
+  };
+
+  const importarBackup = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const parsed = JSON.parse(String(reader.result || ''));
+        if (!Array.isArray(parsed)) throw new Error('formato inválido');
+        const validos = parsed.filter(rec => rec && rec.id);
+        if (db) {
+          try {
+            await Promise.all(validos.map(rec => db.doc(`clientes/${rec.id}`).set(rec)));
+            setLsErro(null);
+            showToast(`Backup importado: ${validos.length} cliente(s) processado(s).`);
+          } catch (e) {
+            showToast(`⚠ Falha ao salvar após importar: ${e && e.message ? e.message : String(e)}`);
+          }
+          return;
+        }
+        let resultado = null;
+        setCarteira(prev => {
+          const merged = [...prev];
+          validos.forEach(rec => {
+            const idx = merged.findIndex(c => c.id === rec.id);
+            if (idx >= 0) merged[idx] = rec; else merged.push(rec);
+          });
+          resultado = lsSaveCarteira(merged);
+          return merged;
+        });
+        if (resultado && !resultado.ok) { setLsErro(resultado.erro); showToast(`⚠ Falha ao salvar após importar: ${resultado.erro}`); }
+        else { setLsErro(null); showToast(`Backup importado: ${validos.length} cliente(s) processado(s).`); }
+      } catch (e) {
+        showToast('Falha ao importar: arquivo JSON inválido.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <div className="max-w-[1180px] mx-auto px-4 sm:px-6 py-8">
+      <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-8">
+        <div>
+          <p className="text-[12.5px] font-medium mb-1.5" style={{ color: 'var(--petroleo)' }}>G&amp;M Contabilidade · Reforma Tributária do Consumo</p>
+          <h1 className="font-display text-[30px] sm:text-[34px] font-semibold leading-tight">Diagnóstico de Enquadramento Tributário 2027</h1>
+          <p className="text-[14px] mt-1.5 max-w-[560px]" style={{ color: 'var(--ink-soft)' }}>
+            Simples Nacional Tradicional, Simples Híbrido e Lucro Presumido, comparados sob a CBS plena da EC nº 132/2023,
+            LC nº 214/2025 e LC nº 227/2026.
+          </p>
+        </div>
+        <SectorToggle setor={d.setor} onChange={(s) => set(exemploPorSetor(s))} />
+      </header>
+
+      <div className="card p-4 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-end gap-3 lg:gap-4">
+          <div className="flex-1 min-w-0">
+            <label className="field-label">Empresa em Análise:</label>
+            <select value={activeClienteId} onChange={(e) => selecionarCliente(e.target.value)}>
+              <option value="">+ Novo cliente (nenhum selecionado)</option>
+              {carteira.map(c => (
+                <option key={c.id} value={c.id}>
+                  {(c.razaoSocial || '(sem razão social)')} - CNPJ: {c.cnpj || '—'} (Anexo {c.anexo || '—'})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button onClick={novoCliente}
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[12.5px] font-semibold"
+              style={{ background: 'var(--petroleo)', color: '#fff' }}>
+              <IconArrowRight className="w-3.5 h-3.5" strokeWidth={2.2} /> Cadastrar / Analisar Novo Cliente
+            </button>
+            <button onClick={excluirClienteAtivo} disabled={!activeClienteId} title="Excluir cliente selecionado"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[12.5px] font-medium"
+              style={{ background: 'var(--rose-tint)', color: 'var(--rose)', opacity: activeClienteId ? 1 : 0.45, cursor: activeClienteId ? 'pointer' : 'not-allowed' }}>
+              <IconTrash className="w-3.5 h-3.5" strokeWidth={2} /> Excluir Cliente
+            </button>
+            <button onClick={exportarBackup} title="Exportar todos os clientes salvos (backup JSON)"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[12.5px] font-medium"
+              style={{ background: 'var(--petroleo-tint)', color: 'var(--petroleo)' }}>
+              <IconDatabase className="w-3.5 h-3.5" strokeWidth={2} /> Exportar Backup
+            </button>
+            <button onClick={() => importInputRef.current && importInputRef.current.click()} title="Importar backup JSON de clientes"
+              className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[12.5px] font-medium"
+              style={{ background: 'var(--petroleo-tint)', color: 'var(--petroleo)' }}>
+              <IconUpload className="w-3.5 h-3.5" strokeWidth={2} /> Importar Backup
+            </button>
+            <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden"
+              onChange={(e) => { if (e.target.files && e.target.files[0]) importarBackup(e.target.files[0]); e.target.value = ''; }} />
+          </div>
+        </div>
+        <p className="text-[11.5px] mt-3" style={{ color: 'var(--ink-soft)' }}>
+          Carteira: {carteira.length} {carteira.length === 1 ? 'empresa diagnosticada' : 'empresas diagnosticadas'} para 2027 · {db ? 'salvas no banco de dados do Claude (visível a quem acessa este artefato na sua organização)' : 'salvas localmente neste navegador (localStorage), sem envio a servidores externos'}.
+        </p>
+        {lsErro && (
+          <p className="text-[11.5px] mt-2 px-3 py-2 rounded-lg" style={{ background: 'var(--rose-tint)', color: 'var(--rose)' }}>
+            ⚠ {lsErro} Os dados preenchidos continuam funcionando na tela, mas não estão sendo salvos permanentemente —
+            ao fechar ou recarregar a página, eles serão perdidos.
+          </p>
+        )}
+      </div>
+
+      {d.cnpjMestreLocked && (d.municipioUF || d.uf === 'AM' || d.anexoDetectadoPGDAS) && (
+        <div className="card p-3 mb-6 flex flex-col sm:flex-row sm:items-center gap-2" style={{ borderColor: 'var(--emerald)', background: 'var(--emerald-tint)' }}>
+          <IconCheckCircle className="w-5 h-5 shrink-0" style={{ color: 'var(--emerald)' }} strokeWidth={1.8} />
+          <div className="flex flex-wrap items-center gap-2">
+            {d.municipioUF && <span className="text-[12px]" style={{ color: 'var(--ink-soft)' }}>{d.municipioUF}</span>}
+            {d.uf === 'AM' && (
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded" style={{ background: 'var(--petroleo-tint)', color: 'var(--petroleo)' }}>
+                Jurisdição Fiscal: SEFAZ/AM | Alíquota ICMS Modal: 20,00%
+              </span>
+            )}
+            {d.anexoDetectadoPGDAS && (
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded" style={{ background: 'var(--violet-tint)', color: 'var(--violet)' }}>
+                Anexo Identificado no PGDAS-D: ANEXO {d.anexoDetectadoPGDAS} - {ANEXO_SEGMENTO[d.anexoDetectadoPGDAS]} | Base: LC nº 123/2006 | Status: calibrado
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-lg text-[13px] font-medium max-w-[360px]"
+          style={{ background: 'var(--petroleo-dark)', color: '#fff' }}>
+          {toast}
+        </div>
+      )}
+
+      {calc.excede && (
+        <div className="mb-6">
+          <AlertCard tone="amber" Icon={IconAlert} title="RBT12 acima do limite do Simples Nacional (R$ 4.800.000,00)">
+            Os cálculos do Simples Nacional Tradicional e Híbrido utilizam a última faixa da tabela como referência, mas a
+            empresa está, na prática, obrigada à exclusão do regime. Avalie o enquadramento no Lucro Presumido ou Lucro Real.
+          </AlertCard>
+        </div>
+      )}
+
+      {d.setor === 'servicos' && (
+        <div className="mb-6">
+          <AlertCard tone={calc.cppNoDAS ? 'petroleo' : 'violet'} Icon={IconInfo}
+            title={`Fator R = ${fmtPct(calc.fatorR)} → Anexo ${calc.nomeAnexo} (${calc.cppNoDAS ? 'CPP patronal incluída no DAS' : 'CPP patronal recolhida à parte, fora do DAS'})`}>
+            {d.anexoServicosForcado
+              ? `Anexo ${d.anexoServicosForcado} identificado no PGDAS-D processado (ou definido manualmente), substituindo o teste automático de Fator R. `
+              : ''}
+            {calc.nomeAnexo === 'III' && 'A folha de pagamento (anualizada) representa ao menos 28% do RBT12, então a atividade se enquadra no Anexo III da LC 123/2006, cuja alíquota já inclui a CPP patronal.'}
+            {calc.nomeAnexo === 'V' && 'A folha de pagamento (anualizada) representa menos de 28% do RBT12, então a atividade se enquadra no Anexo V da LC 123/2006 — a CPP patronal também está incluída na alíquota do DAS neste anexo (só o Anexo IV tem CPP fora do DAS, art. 13, VI, LC 123/2006).'}
+            {calc.nomeAnexo === 'IV' && 'A atividade se enquadra no Anexo IV da LC 123/2006 (lista fechada: construção civil, obras de engenharia, vigilância, limpeza e conservação, advocacia) — neste anexo específico a CPP patronal não integra o DAS e é recolhida separadamente, à alíquota única de 20% sobre folha + pró-labore (sem RAT/terceiros), somando-se ao DAS no Tradicional e no Híbrido.'}
+            {d.anexoServicosForcado && (
+              <>
+                {' '}
+                <button onClick={() => set({ anexoServicosForcado: null, anexoDetectadoPGDAS: null })}
+                  className="underline font-medium" style={{ color: 'inherit' }}>
+                  Voltar ao teste automático de Fator R
+                </button>
+              </>
+            )}
+          </AlertCard>
+        </div>
+      )}
+
+      <UploadModule key={resetCounter} setor={d.setor} d={d}
+        onApply={applyFromDocs} onLoadExample={(key) => setD(exemploPorSetor(key))} />
+
+      <BenefitsPanel setor={d.setor} comercio={d.beneficios.comercio} servicos={d.beneficios.servicos}
+        onChangeComercio={setBeneficiosComercio} onChangeServicos={setBeneficiosServicos} />
+
+      <HistoricoTable d={d} onChangeMes={setHistoricoMes} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
+        <div className="card p-5 h-fit lg:sticky lg:top-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-[16px] font-semibold">Dados do cliente</h2>
+            <IconCalculator className="w-5 h-5" style={{ color: 'var(--petroleo)' }} />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className="field-label">Razão social / nome fantasia</label>
+              <input type="text" value={d.razaoSocial} onChange={e => set({ razaoSocial: e.target.value })} placeholder="Ex.: Amazônia Comércio Ltda" />
+            </div>
+            <div>
+              <label className="field-label flex items-center gap-1.5">
+                CNPJ
+                {d.cnpjMestreLocked && <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: 'var(--emerald-tint)', color: 'var(--emerald)' }}>mestre fixado</span>}
+              </label>
+              <input type="text" value={d.cnpj} onChange={e => set(aplicarCnpjDigitado(e.target.value))} placeholder="00.000.000/0000-00"
+                disabled={d.cnpjMestreLocked} style={d.cnpjMestreLocked ? { opacity: 0.6, cursor: 'not-allowed' } : {}} />
+              {d.cnpjMestreLocked && <p className="text-[11px] mt-1" style={{ color: 'var(--ink-soft)' }}>Bloqueado após o auto-cadastro. Use "Limpar Empresa" para alterar.</p>}
+            </div>
+
+            <NumberField label="Faturamento mensal médio" prefix="R$" value={d.faturamentoMensal} step={1000} onChange={v => set({ faturamentoMensal: v })} />
+            <NumberField label="RBT12 (receita bruta dos últimos 12 meses)" prefix="R$" value={d.rbt12} step={10000} onChange={v => set({ rbt12: v })} hint="Usado para apurar a alíquota efetiva do Simples Nacional." />
+            <NumberField label={isComercio ? 'Compras de mercadorias tributadas / mês' : isIndustria ? 'Compras de matérias-primas e insumos industriais / mês' : 'Insumos/serviços tomados de PJ / mês'} prefix="R$" value={d.comprasMensais} step={1000} onChange={v => set({ comprasMensais: v })} />
+
+            <div>
+              <label className="field-label">% adquirido de fornecedores do Regime Normal</label>
+              <div className="flex items-center gap-3">
+                <input type="range" min="0" max="100" value={d.pctFornecedorRegimeNormal} onChange={e => set({ pctFornecedorRegimeNormal: parseInt(e.target.value) })} />
+                <span className="font-mono text-[13px] w-10 text-right">{d.pctFornecedorRegimeNormal}%</span>
+              </div>
+              <p className="text-[11.5px] mt-1" style={{ color: 'var(--ink-soft)' }}>Compras de optantes do Simples (DAS) não geram crédito pleno de CBS.</p>
+            </div>
+
+            <NumberField label="Folha de pagamento bruta mensal" prefix="R$" value={d.folhaMensal} step={500} onChange={v => set({ folhaMensal: v })} />
+            <NumberField label="Pró-labore mensal" prefix="R$" value={d.proLabore} step={500} onChange={v => set({ proLabore: v })} />
+            <div>
+              <label className="field-label">UF do estabelecimento</label>
+              <input type="text" maxLength="2" value={d.uf} onChange={e => set({ uf: e.target.value.toUpperCase().slice(0, 2) })} placeholder="AM" />
+              <p className="text-[11px] mt-1" style={{ color: 'var(--ink-soft)' }}>Padrão AM (alíquota modal de ICMS 20,00% — Lei Complementar nº 242/2022, que alterou a Lei Complementar nº 19/97).</p>
+            </div>
+            <NumberField label={!isServicos ? 'Alíquota estadual de ICMS' : 'Alíquota municipal de ISS'} suffix="%" value={d.aliquotaEstMun} step={0.5} onChange={v => set({ aliquotaEstMun: v })}
+              hint={!isServicos && d.uf === 'AM' ? 'Alíquota modal do Amazonas (20,00%); ajuste para simular incentivos da ZFM/ALC ou operações interestaduais.' : undefined} />
+
+            <div>
+              <label className="field-label">% de vendas / serviços para PJ (B2B) — restante é B2C</label>
+              <div className="flex items-center gap-3">
+                <input type="range" min="0" max="100" value={d.pctB2B} onChange={e => set({ pctB2B: parseInt(e.target.value) })} />
+                <span className="font-mono text-[13px] w-10 text-right">{d.pctB2B}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 mt-5 pt-4" style={{ borderTop: '1px solid var(--line-soft)' }}>
+            <p className="text-[11.5px] font-medium" style={{ color: 'var(--ink-soft)' }}>Casos de exemplo</p>
+            <button onClick={() => setD(EXEMPLO_COMERCIO)} className="text-left text-[13px] px-3 py-2 rounded-lg flex items-center justify-between" style={{ background: 'var(--petroleo-tint)', color: 'var(--petroleo)' }}>
+              Carregar caso: Comércio Varejista <IconArrowRight className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={() => setD(EXEMPLO_INDUSTRIA)} className="text-left text-[13px] px-3 py-2 rounded-lg flex items-center justify-between" style={{ background: 'var(--petroleo-tint)', color: 'var(--petroleo)' }}>
+              Carregar caso: Indústria <IconArrowRight className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={() => setD(EXEMPLO_SERVICOS)} className="text-left text-[13px] px-3 py-2 rounded-lg flex items-center justify-between" style={{ background: 'var(--petroleo-tint)', color: 'var(--petroleo)' }}>
+              Carregar caso: Empresa de Serviços <IconArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <div className="card p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between" style={{ background: 'var(--emerald-tint)', borderColor: 'var(--emerald)' }}>
+            <div className="flex items-center gap-3">
+              <IconTrendDown className="w-8 h-8" strokeWidth={1.6} style={{ color: 'var(--emerald)' }} />
+              <div>
+                <p className="text-[12.5px]" style={{ color: 'var(--ink-soft)' }}>Economia anual estimada ao optar pelo regime recomendado</p>
+                <p className="font-display text-[24px] font-semibold" style={{ color: 'var(--emerald)' }}>{fmtBRL(economiaAnual)}</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button onClick={() => setShowParecer(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold" style={{ background: 'var(--petroleo)', color: '#fff' }}>
+                <IconFileCheck className="w-4 h-4" strokeWidth={2} /> Gerar parecer técnico
+              </button>
+              <button onClick={() => setShowMemorial(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold" style={{ background: 'var(--violet)', color: '#fff' }}>
+                <IconFileText className="w-4 h-4" strokeWidth={2} /> Memorial de cálculo (Anexo A)
+              </button>
+              {d.setor !== 'servicos' && d.ncmDetalhado.length > 0 && (
+                <button onClick={() => setShowNcmAnexo(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold" style={{ background: 'var(--amber)', color: '#fff' }}>
+                  <IconTag className="w-4 h-4" strokeWidth={2} /> NCMs para conferência (Anexo B)
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+            {['tradicional', 'hibrido', 'presumido'].map(k => (
+              <RegimeCard key={k} regime={regimes[k]} isMelhor={k === calc.melhor} />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AlertCard tone="amber" Icon={IconAlert} title="Split Payment — impacto no fluxo de caixa">
+              Nos regimes Simples Híbrido e Lucro Presumido, a CBS incidente em vendas por cartão ou PIX é retida e
+              recolhida automaticamente no momento da transação, reduzindo o valor líquido disponibilizado de imediato à
+              empresa — em contraste com a guia única mensal do DAS no Simples Tradicional, que não sofre esse destaque.
+            </AlertCard>
+            {isIndustria ? (
+              <AlertCard tone="violet" Icon={IconAlert} title="Alerta da cadeia de suprimentos (B2B)">
+                Como indústrias vendem majoritariamente para distribuidores e lojistas PJ, optar pelo Simples Tradicional
+                impede o cliente PJ de aproveitar créditos integrais de CBS (8,8%), gerando desvantagem competitiva e risco
+                de perda de compradores para indústrias do Regime Normal ou do Simples Híbrido. Com {d.pctB2B}% das vendas
+                destinadas a PJ, esse fator tende a pesar na decisão comercial, além do custo tributário isolado.
+              </AlertCard>
+            ) : (
+              <AlertCard tone="petroleo" Icon={IconInfo} title="Impacto comercial na carteira de clientes">
+                Com {d.pctB2B}% das operações destinadas a clientes PJ (B2B), {d.pctB2B >= 50
+                  ? 'os clientes pessoa jurídica tendem a pressionar por crédito financeiro integral de CBS na nota fiscal, o que reforça o interesse comercial pelos regimes Híbrido e Presumido.'
+                  : 'a maior parte das vendas é a consumidor final (B2C), que não aproveita crédito tributário — o que reforça a segurança de manter a margem no Simples Nacional Tradicional.'}
+              </AlertCard>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <footer className="mt-10 pt-5 text-center text-[12px]" style={{ borderTop: '1px solid var(--line-soft)', color: 'var(--ink-soft)' }}>
+        Simulação de caráter orientativo, elaborada com base em premissas da EC nº 132/2023, LC nº 214/2025 e LC nº
+        227/2026 para o exercício de 2027. A alíquota de referência da CBS (8,8%) é a projeção oficial vigente,
+        sujeita à fixação definitiva por Resolução do Senado Federal até 15/12 (art. 349, LC 214/2025). A dedução do
+        Híbrido no DAS usa o percentual de repartição de Cofins/PIS por faixa dos Anexos I e III da LC 123/2006
+        (Resolução CGSN nº 94/2011), redistribuído para CBS/IBS. Não substitui análise técnica individualizada.
+        G&amp;M Contabilidade LTDA — CRC-AM-010043-O/9.
+      </footer>
+
+      {showParecer && <Parecer d={d} calc={calc} onClose={() => setShowParecer(false)} />}
+      {showMemorial && <MemorialCalculo d={d} calc={calc} onClose={() => setShowMemorial(false)} />}
+      {showNcmAnexo && <AnexoNCM d={d} onClose={() => setShowNcmAnexo(false)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

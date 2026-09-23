@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.env.*
+test-results
+playwright-report
+.git
+backups
+*.html
+!index.html
+DOCUMENTACAO_TECNICA.md
