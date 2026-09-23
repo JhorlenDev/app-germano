@@ -9,10 +9,26 @@ Aplicação para um escritório contábil: carteira compartilhada, comparação 
 - PostgreSQL: usuários, sessões, clientes, resultados versionados e registro das operações de cadastro/alteração/exclusão.
 - Login por e-mail/senha (scrypt), sessão em cookie HttpOnly/SameSite e Secure em produção; verificação de origem nas mutações.
 - Uma carteira compartilhada para todos os usuários cadastrados deste escritório. Não é um serviço multiempresa/multitenant.
-- Salvamento explícito com confirmação do servidor, aviso de alterações pendentes e controle de versão para evitar sobrescrita entre usuários.
+- Salvamento automático após 1,2 segundo de inatividade quando há CNPJ completo, com confirmação do servidor e controle de versão. O botão Salvar continua disponível para tentar novamente em caso de erro.
 - Arquivos XML/PDF/TXT originais não são armazenados. Dados extraídos e seus hashes são salvos com o diagnóstico. PDFs digitalizados não têm OCR.
 
 O HTML e a documentação originais foram preservados como referência histórica. Eles **não** são os arquivos que devem ser publicados para executar esta versão.
+
+## Cadastro por upload
+
+Envie Cartão CNPJ, PGDAS ou XML na aba Documentos, sem preencher antes o cadastro.
+Comprovantes e extratos reconhecidos também identificam o titular quando
+trazem seu CNPJ, após a prioridade dos documentos fiscais.
+O CNPJ é identificado nessa ordem de prioridade; documentos de outras empresas
+são rejeitados. Cartão CNPJ preenche razão social, município/UF e CNAE quando
+localizados. CNPJ digitado manualmente também ativa o salvamento automático;
+não existe consulta à Receita pelo número. Sem razão social extraída, o registro
+é identificado pelo CNPJ até que o nome seja preenchido.
+Os documentos preenchem automaticamente os dados financeiros pelo mesmo
+agregador do HTML original e atualizam até seis competências importadas no
+histórico. A competência da simulação continua livre e não é sobrescrita pelo upload. Dados de demonstração
+não são salvos automaticamente. Falhas de gravação ficam visíveis e preservam
+o rascunho na tela; CNPJ já cadastrado exige abrir o cliente existente.
 
 ## Desenvolvimento local
 
@@ -111,3 +127,17 @@ npm run test:e2e
 ```
 
 Os testes de navegador requerem banco/usuário local, `.env` e Chromium do Playwright (`npx playwright install chromium`). Eles criam clientes temporários e os removem ao concluir. Cobrem cadastro, recarga, duplicatas, competências, remoção, impressão, backup, validação, sessão, conflito de versão e layout móvel. Screenshots e PDF de teste ficam em `test-results/`.
+
+### Extratos e comprovantes de apoio
+
+Comprovantes Bradesco/Caixa usam os dados do pagador; comprovantes de arrecadação
+usam o contribuinte, sem confundir fornecedor ou beneficiário com o cliente.
+Os extratos reconhecidos têm identificação e período; o relatório de vendas
+Cielo também exibe seu resumo bruto/taxas/líquido. Esses documentos aparecem
+como documentos de apoio e não alteram os valores fiscais da simulação.
+O extrato Caixa sem CNPJ não é vinculado automaticamente apenas pelo nome.
+Reenviar o mesmo PDF de apoio atualiza sua classificação sem duplicá-lo.
+
+O leitor PDF reconstrói as linhas pela posição visual: a ordem interna de
+objetos de alguns PDFs bancários é invertida. As fórmulas e os agregadores
+fiscais originais permanecem inalterados.

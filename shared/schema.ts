@@ -24,9 +24,19 @@ export const documentSchema = z.object({
   status: z.enum(["ok", "estimado", "erro", "rejeitado"]),
   tipo: z.string().max(40),
   badge: z.string().max(1500),
+  anexoDetectado: z
+    .object({
+      setor: z.enum(["comercio", "industria", "servicos"]),
+      anexo: z.enum(["I", "II", "III", "IV", "V"]),
+    })
+    .nullable()
+    .optional(),
   dados: z
     .object({
       vNF: amount.optional(),
+      valorBruto: amount.optional(),
+      taxas: amount.optional(),
+      valorLiquido: amount.optional(),
       isB2B: z.boolean().optional(),
       credito: z.boolean().optional(),
       faturamento: amount.nullable().optional(),
@@ -34,16 +44,36 @@ export const documentSchema = z.object({
       folha: amount.nullable().optional(),
       proLabore: amount.nullable().optional(),
       cnae: z.string().max(30).nullable().optional(),
+      ufEmit: z.string().length(2).nullable().optional(),
+      porCategoria: z
+        .object({
+          conferir: amount.optional(),
+          cesta: amount,
+          reduzido60: amount,
+          padrao: amount,
+        })
+        .optional(),
+      itensNCM: z
+        .array(
+          z.object({
+            ncm: z.string().nullable(),
+            descricao: z.string().nullable(),
+            vProd: amount,
+            categoria: z.string(),
+          }),
+        )
+        .optional(),
     })
     .default({}),
 });
 export const stateSchema = z
   .object({
-    razaoSocial: z.string().trim().min(2).max(200),
+    razaoSocial: z.string().trim().max(200),
     cnpj: z.string().regex(/^\d{14}$/, "Informe os 14 dígitos do CNPJ."),
     setor: z.enum(["comercio", "industria", "servicos"]),
     uf: z.string().length(2),
     municipioUF: z.string().max(120),
+    cnae: z.string().max(30).default(""),
     faturamentoMensal: amount,
     rbt12: amount,
     comprasMensais: amount,

@@ -517,6 +517,7 @@ hr {
   min-width: 0;
 }
 .table-wrap {
+  contain: inline-size layout;
   overflow-x: auto;
   max-width: 100%;
 }

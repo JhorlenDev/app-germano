@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   Save,
@@ -30,13 +30,14 @@ import {
   labels,
   sectors,
   emptyMonth,
-  aggregateDocuments,
-  mergeDocuments,
   formatCompetencia,
   ENGINE_VERSION,
 } from "../shared/engine.js";
 import { stateSchema, type DiagnosticState } from "../shared/schema";
 import Report from "./Report";
+import { SUPPORT_TYPES } from "./support-documents.js";
+import { parseFileRaw } from "./parsers.js";
+import { importDocuments } from "./import-workflow.js";
 const tabs = [
   { id: "data", label: "Dados da empresa", icon: Building2 },
   { id: "documents", label: "Documentos", icon: FileUp },
@@ -68,23 +69,29 @@ export default function Diagnostic({
     [message, setMessage] = useState(""),
     [demo, setDemo] = useState(false),
     [report, setReport] = useState(false);
+  const latest = useRef(d);
+  latest.current = d;
+  const saving = useRef(false);
   const change = (patch: Partial<DiagnosticState>) => {
     setD((prev) => ({ ...prev, ...patch }));
     setDirty(true);
     onDirty(true);
     setMessage("");
+    setError("");
   };
   const calc = useMemo(() => computeRegimes(d), [d]);
   const inputValid =
     d.cestaPct + d.reduzido60Pct <= 100 && d.comprasCredito <= d.comprasMensais;
   useEffect(() => () => onBusy(false), [onBusy]);
   async function save() {
+    if (saving.current) return;
     setError("");
     const parsed = stateSchema.safeParse(d);
     if (!parsed.success) {
       setError(parsed.error.issues.map((i) => i.message).join(" · "));
       return;
     }
+    saving.current = true;
     setBusy(true);
     onBusy(true);
     try {
@@ -93,19 +100,28 @@ export default function Diagnostic({
         body: JSON.stringify({ d: parsed.data, version: record?.version }),
       });
       setRecord(saved);
-      setD(saved.d);
-      setDirty(false);
-      onDirty(false);
+      if (latest.current === d) {
+        setD(saved.d);
+        setDirty(false);
+        onDirty(false);
+      }
       setDemo(false);
       setMessage("Diagnóstico salvo no servidor.");
       onSaved();
     } catch (e: any) {
       setError(e.message);
     } finally {
+      saving.current = false;
       setBusy(false);
       onBusy(false);
     }
   }
+  useEffect(() => {
+    if (!dirty || busy || error || demo || !stateSchema.safeParse(d).success)
+      return;
+    const timer = setTimeout(() => void save(), 1200);
+    return () => clearTimeout(timer);
+  }, [d, dirty, busy, error, demo, record]);
   const number = (
     key: keyof DiagnosticState,
     label: string,
@@ -150,13 +166,19 @@ export default function Diagnostic({
       </button>
       <PageHeading
         eyebrow="PLANEJAMENTO TRIBUTÁRIO · 2027"
-        title={record ? d.razaoSocial : "Novo diagnóstico"}
+        title={record ? d.razaoSocial || d.cnpj : "Novo diagnóstico"}
         description="Organize os dados da empresa e explore os cenários de tributação."
         action={
           <div className="row">
             <span className={`save-state ${dirty ? "pending" : ""}`}>
               {dirty ? (
-                "Alterações não salvas"
+                busy ? (
+                  "Salvando…"
+                ) : error ? (
+                  "Alterações não salvas"
+                ) : (
+                  "Aguardando salvamento automático"
+                )
               ) : record ? (
                 <>
                   <Check size={15} />
@@ -234,21 +256,29 @@ export default function Diagnostic({
                     </Field>
                     <Field
                       label="CNPJ"
-                      hint="Use o CNPJ da empresa para validar os documentos importados."
+                      hint="Preenchido pelo upload ou informado manualmente. Após identificar a empresa, o cadastro é salvo automaticamente."
                     >
                       <input
+                        disabled={busy}
                         inputMode="numeric"
                         value={d.cnpj}
                         maxLength={18}
                         onChange={(e) => {
-                          if (d.documentos.length) return;
+                          if (
+                            record ||
+                            (d.documentos.length && d.cnpj.length === 14)
+                          )
+                            return;
                           change({
                             cnpj: e.target.value
                               .replace(/\D/g, "")
                               .slice(0, 14),
                           });
                         }}
-                        readOnly={d.documentos.length > 0}
+                        readOnly={
+                          !!record ||
+                          (d.documentos.length > 0 && d.cnpj.length === 14)
+                        }
                         placeholder="14 dígitos"
                       />
                     </Field>
@@ -269,6 +299,14 @@ export default function Diagnostic({
                           </option>
                         ))}
                       </select>
+                    </Field>
+                    <Field label="CNAE principal">
+                      <input
+                        value={d.cnae || ""}
+                        maxLength={30}
+                        onChange={(e) => change({ cnae: e.target.value })}
+                        placeholder="Extraído do Cartão CNPJ"
+                      />
                     </Field>
                     <Field label="Município">
                       <input
@@ -306,7 +344,10 @@ export default function Diagnostic({
                   <div className="section-heading">
                     <div>
                       <h2>Dados financeiros</h2>
-                      <p>Valores do mês escolhido para a comparação.</p>
+                      <p>
+                        Preenchidos automaticamente pelos documentos enviados,
+                        como no HTML original.
+                      </p>
                     </div>
                     <span className="step-number">02</span>
                   </div>
@@ -860,7 +901,8 @@ export default function Diagnostic({
           <div className="context-tip">
             <Info size={18} />
             <p>
-              Salve o diagnóstico para continuar depois, de qualquer computador.
+              Após identificar o CNPJ, as alterações são salvas automaticamente
+              no servidor.
             </p>
           </div>
           <small className="engine-version">Motor {ENGINE_VERSION}</small>
@@ -881,62 +923,10 @@ function Documents({
 }) {
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
-    [competencia, setCompetencia] = useState(d.competencia),
     [progress, setProgress] = useState("");
-  const competencias = [
-    ...new Set(
-      d.documentos
-        .filter((f) => f.status === "ok" && f.competencia)
-        .map((f) => f.competencia!),
-    ),
-  ].sort();
-  const apply = (
-    docs: DiagnosticState["documentos"],
-    comp: string,
-    remove = false,
-  ) => {
-    const agg = aggregateDocuments(docs, comp);
-    const month = {
-      competencia: comp,
-      faturamento: agg.faturamento,
-      compras: agg.compras,
-      comprasCredito: agg.comprasCredito,
-      folha: agg.folha,
-      proLabore: agg.proLabore,
-      icmsCredito:
-        d.historico.find((m) => m.competencia === comp)?.icmsCredito || 0,
-    };
-    const historico = [
-      ...d.historico.filter((m) => m.competencia !== comp),
-      month,
-    ].sort((a, b) => a.competencia.localeCompare(b.competencia));
-    const patch: Partial<DiagnosticState> = { documentos: docs, historico };
-    if (!remove || d.competencia === comp)
-      Object.assign(patch, {
-        competencia: comp,
-        faturamentoMensal: agg.faturamento,
-        comprasMensais: agg.compras,
-        comprasCredito: agg.comprasCredito,
-        folhaMensal: agg.folha,
-        proLabore: agg.proLabore,
-      });
-    if (agg.rbt12 !== null) patch.rbt12 = agg.rbt12;
-    else if (
-      remove &&
-      d.documentos.some(
-        (f) => f.competencia === comp && f.tipo === "pgdas" && f.dados.rbt12,
-      )
-    )
-      patch.rbt12 = 0;
-    change(patch);
-  };
   async function importFiles(files: FileList | null) {
     if (!files?.length) return;
     const selectedFiles = Array.from(files);
-    if (d.cnpj.length !== 14) {
-      setMessage("Informe o CNPJ da empresa na aba Dados antes de importar.");
-      return;
-    }
     if (files.length > 100 || d.documentos.length + files.length > 2000) {
       setMessage("Importe até 100 arquivos por lote e 2.000 por cliente.");
       return;
@@ -945,7 +935,6 @@ function Documents({
     onBusy(true);
     setMessage("");
     try {
-      const { parseFileRaw, finalizeFile } = await import("./parsers.js");
       const results = [];
       for (const [index, file] of selectedFiles.entries()) {
         setProgress(`Processando ${index + 1} de ${selectedFiles.length}`);
@@ -961,12 +950,16 @@ function Documents({
           .map((b) => b.toString(16).padStart(2, "0"))
           .join("");
         const raw = await parseFileRaw(file);
-        results.push(finalizeFile({ ...raw, hash }, d.cnpj, false));
+        results.push({ ...raw, hash });
       }
-      const { merged, duplicates } = mergeDocuments(d.documentos, results);
-      change({ documentos: merged });
+      const { patch, duplicates, reprocessed, master } = importDocuments(
+        d,
+        results,
+      );
+      change(patch);
+
       setMessage(
-        `${results.length - duplicates} arquivo(s) adicionado(s). ${duplicates} duplicado(s) ignorado(s). Confira os documentos e escolha a competência para aplicar.`,
+        `${results.length - duplicates} arquivo(s) adicionado(s). ${duplicates - reprocessed} duplicado(s) ignorado(s). ${reprocessed ? `${reprocessed} documento(s) reprocessado(s). ` : ""} ${master ? "Empresa identificada. Campos reconhecidos aplicados; confira os avisos de cada documento." : "CNPJ não identificado. Envie o Cartão CNPJ, PGDAS ou informe o CNPJ manualmente."}`,
       );
     } catch (e: any) {
       setMessage(e.message);
@@ -990,7 +983,10 @@ function Documents({
       <label className={`upload-zone ${busy ? "disabled" : ""}`}>
         <UploadCloud size={37} />
         <strong>{busy ? progress : "Selecione os documentos fiscais"}</strong>
-        <span>NF-e/NFC-e em XML · PGDAS e folha em PDF ou TXT</span>
+        <span>
+          Cartão CNPJ, PGDAS, folha, extratos e comprovantes em PDF/TXT ·
+          NF-e/NFC-e em XML
+        </span>
         <small>
           Até 10 MB por arquivo. PDFs digitalizados precisam de OCR externo.
         </small>
@@ -1011,32 +1007,11 @@ function Documents({
           {message}
         </div>
       )}
-      <div className="document-apply">
-        <Field label="Competência para aplicar">
-          <select
-            value={competencia}
-            onChange={(e) => setCompetencia(e.target.value)}
-          >
-            <option value="">Selecione um mês</option>
-            {competencias.map((c) => (
-              <option key={c} value={c}>
-                {formatCompetencia(c)}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Button
-          disabled={busy || !competencia || !competencias.includes(competencia)}
-          onClick={() => {
-            apply(d.documentos, competencia);
-            setMessage(
-              "Valores desta competência aplicados ao mês e ao histórico. Revise os créditos e o enquadramento.",
-            );
-          }}
-        >
-          Aplicar valores deste mês
-        </Button>
-      </div>
+      <p className="notice">
+        Os documentos preenchem os dados financeiros e o histórico
+        automaticamente. A competência da simulação pode ser escolhida
+        livremente na aba Dados da empresa.
+      </p>
       <p className="small-note">
         PDFs e XMLs são lidos no seu navegador. Ao salvar, apenas os dados
         extraídos ficam no servidor. Notas sem autorização informada ou
@@ -1060,14 +1035,14 @@ function Documents({
                       ? "CNPJ divergente / ausente"
                       : f.status === "erro"
                         ? "Não processado"
-                        : "Conferência manual"}
+                        : SUPPORT_TYPES.has(f.tipo)
+                          ? "Documento de apoio"
+                          : "Conferência manual"}
                 </span>
                 {f.competencia ? (
                   <small>{formatCompetencia(f.competencia)}</small>
                 ) : (
-                  <small>
-                    Competência não identificada; ajuste os valores manualmente.
-                  </small>
+                  <small>Sem competência única identificada.</small>
                 )}
               </div>
             </div>
@@ -1077,14 +1052,9 @@ function Documents({
               aria-label={`Remover ${f.name}`}
               onClick={() => {
                 const docs = d.documentos.filter((x) => x.id !== f.id);
-                if (
-                  f.competencia &&
-                  d.historico.some((m) => m.competencia === f.competencia)
-                )
-                  apply(docs, f.competencia, true);
-                else change({ documentos: docs });
+                change(importDocuments({ ...d, documentos: docs }, []).patch);
                 setMessage(
-                  "Documento removido. Os totais importados da competência aplicada foram recalculados.",
+                  "Documento removido. Dados atualizados a partir dos documentos restantes.",
                 );
               }}
             >

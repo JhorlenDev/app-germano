@@ -1,3 +1,4 @@
+import { parseSupportDocument, SUPPORT_TYPES } from "./support-documents.js";
 import { classifyNCM, formatCompetencia } from "../shared/engine.js";
 
 export function parseCurrencyBR(str) {
@@ -68,19 +69,40 @@ function extractCNPJFromText(text) {
   }
   return null;
 }
-function extractRazaoSocial(text) {
-  const m =
-    /(NOME EMPRESARIAL|RAZ[AÃ]O SOCIAL)[:\s\-]{1,10}([A-ZÀ-Ü0-9 .,&\-]{5,90})/i.exec(
-      text,
-    );
-  return m ? m[2].trim().replace(/\s{2,}/g, " ") : null;
+export function extractRazaoSocial(text) {
+  // A missing value must never consume the next field label in a PDF.
+  const labels =
+    /\b(?:nome empresarial|raz[aã]o social|benefici[aá]rio(?: final)?|nome fantasia|t[ií]tulo do estabelecimento|porte|natureza jur[ií]dica|situa[cç][aã]o cadastral|data de abertura|cnpj|c[oó]digo e descri[cç][aã]o|munic[ií]pio|endere[cç]o|logradouro|capital social|quadro de s[oó]cios|uf)(?:\s*:|\s*$)/i;
+  const fields =
+    /(?:NOME EMPRESARIAL|RAZ[AÃ]O SOCIAL)[ \t:–—-]*(?:\r?\n[ \t]*)?([^\r\n]*)/gi;
+  for (const match of (text || "").matchAll(fields)) {
+    let candidate = match[1].trim();
+    const nextLabel = labels.exec(candidate);
+    if (nextLabel) candidate = candidate.slice(0, nextLabel.index).trim();
+    candidate = candidate.replace(/[ \t]+/g, " ");
+    if (
+      /^(?:n[aã]o informado|n[aã]o consta|n[aã]o se aplica)$/i.test(
+        candidate,
+      ) ||
+      candidate.length < 2 ||
+      candidate.length > 200 ||
+      !/[a-zÀ-ÿ]/i.test(candidate) ||
+      /^[-–—:.]+$/.test(candidate)
+    )
+      continue;
+    return candidate;
+  }
+  return null;
 }
 function extractCNAEFromCartao(text) {
-  const m = /(\d{2}\.?\d{2}-?\d-?\d{2})/.exec(text);
-  return m ? m[1] : null;
+  const match =
+    /(?:CNAE|ATIVIDADE ECON[ÔO]MICA PRINCIPAL)[^\d]{0,80}(\d{2}\.?\d{2}-?\d[-\/]?\d{2})/i.exec(
+      text,
+    );
+  return match ? match[1] : null;
 }
 function extractMunicipioUF(text) {
-  const mm = /MUNIC[IÍ]PIO[:\s\-]{1,10}([A-ZÀ-Ü ]{3,40})/i.exec(text);
+  const mm = /MUNIC[IÍ]PIO[:\s\-]{1,10}([^\r\n]{3,40})/i.exec(text);
   const uf = /\bUF[:\s\-]{1,5}([A-Z]{2})\b/.exec(text);
   if (mm && uf) return `${mm[1].trim()} - ${uf[1]}`;
   if (mm) return mm[1].trim();
@@ -240,6 +262,8 @@ export async function parseFileRaw(file) {
         ext === "txt"
           ? await file.text()
           : await (await import("./pdf.js")).readPDF(file);
+      const support = parseSupportDocument(text);
+      if (support) return { ...base, ...support };
       const lower = text.toLowerCase();
       const nameLower = file.name.toLowerCase();
       const cnae = extractCNAE(text);
@@ -252,7 +276,7 @@ export async function parseFileRaw(file) {
       const looksCartao =
         /cart[aã]o\s*cnpj|comprovante\s*de\s*inscri[cç][aã]o|situa[cç][aã]o\s*cadastral/i.test(
           lower,
-        ) || /cartao.?cnpj|comprovante/i.test(nameLower);
+        ) || /cart[aã]o[ _-]?cnpj/i.test(nameLower);
       const looksPgdas =
         !looksCartao &&
         (/pgdas|rbt\s*-?\s*12|simples\s*nacional/i.test(lower) ||
@@ -441,6 +465,13 @@ export function finalizeFile(r, master, isMasterSource) {
     return rec;
   }
 
+  if (SUPPORT_TYPES.has(r.tipo) && (!master || !r.ownCNPJ)) {
+    rec.status = "estimado";
+    rec.tipo = r.tipo;
+    rec.dados = r.dados;
+    rec.badge = r.parseBadgeBase;
+    return rec;
+  }
   if (!master || !r.ownCNPJ || r.ownCNPJ !== master) {
     rec.status = "rejeitado";
     rec.tipo = "rejeitado";

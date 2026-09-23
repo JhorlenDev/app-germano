@@ -73,14 +73,10 @@ test("cadastro real, persistência, concorrência, documentos, impressão e back
     await expect(page.getByRole("status")).toContainText(
       "1 duplicado(s) ignorado(s)",
     );
-    await page.getByLabel("Competência para aplicar").selectOption("2027-01");
-    await page
-      .getByRole("button", { name: "Aplicar valores deste mês" })
-      .click();
     await page.getByRole("tab", { name: "Dados da empresa" }).click();
     await expect(
       page.getByLabel("Faturamento mensal", { exact: true }),
-    ).toHaveValue("100000");
+    ).toHaveValue("200000");
     await page.getByRole("tab", { name: "Comparativo", exact: true }).click();
     await page.screenshot({
       path: "test-results/comparativo-desktop.png",
@@ -106,7 +102,7 @@ test("cadastro real, persistência, concorrência, documentos, impressão e back
     await page.getByRole("tab", { name: "Dados da empresa" }).click();
     await expect(
       page.getByLabel("Faturamento mensal", { exact: true }),
-    ).toHaveValue("0");
+    ).toHaveValue("100000");
     await page.getByRole("button", { name: "Salvar diagnóstico" }).click();
     await expect(page.getByRole("status")).toContainText("salvo no servidor");
     await page
@@ -151,11 +147,13 @@ test("mobile: navegação acessível e sem overflow horizontal", async ({
   await expect(
     page.getByRole("heading", { name: "Carteira de clientes" }),
   ).toBeVisible();
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBeTruthy();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    )
+    .toBeTruthy();
   await page.screenshot({
     path: "test-results/carteira-mobile.png",
     fullPage: true,

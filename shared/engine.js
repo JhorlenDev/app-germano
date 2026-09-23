@@ -35,6 +35,7 @@ export function blankState() {
     setor: "comercio",
     uf: "AM",
     municipioUF: "",
+    cnae: "",
     faturamentoMensal: 0,
     rbt12: 0,
     comprasMensais: 0,

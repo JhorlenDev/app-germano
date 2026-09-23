@@ -143,7 +143,7 @@ app.get("/api/clients", async (_req, res) => {
     rows.map((r) => ({
       id: r.id,
       cnpj: r.cnpj,
-      name: r.name,
+      name: r.name || r.cnpj,
       sector: r.sector,
       results: r.results,
       version: r.version,

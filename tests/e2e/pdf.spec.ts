@@ -64,3 +64,39 @@ test("PDF.js extrai valores de um PDF com stream Flate comprimido", async ({
   expect(text).toContain("1950000,00");
   expect(text).toContain("12.345.678/0001-95");
 });
+test("PDF não usa Beneficiário Final como nome e preserva razão social válida", async ({
+  page,
+  context,
+}) => {
+  const pdfPage = await context.newPage();
+  await pdfPage.setContent(
+    "<p>COMPROVANTE DE INSCRIÇÃO</p><p>CNPJ: 12.345.678/0001-95</p><p>Nome Empresarial:</p><p>Beneficiário Final:</p>",
+  );
+  const missingName = Array.from(await pdfPage.pdf());
+  await pdfPage.setContent(
+    "<p>COMPROVANTE DE INSCRIÇÃO</p><p>CNPJ: 12.345.678/0001-95</p><p>Nome Empresarial:</p><p>EMPRESA FICTÍCIA LTDA</p><p>Beneficiário Final:</p>",
+  );
+  const validName = Array.from(await pdfPage.pdf());
+  await pdfPage.close();
+  await page.goto("/");
+  const names = await page.evaluate(
+    async (pdfs) => {
+      // @ts-expect-error módulo servido pelo Vite durante o teste
+      const { parseFileRaw } = await import("/src/parsers.js");
+      return Promise.all(
+        pdfs.map(
+          async (bytes) =>
+            (
+              await parseFileRaw(
+                new File([new Uint8Array(bytes)], "cartao_cnpj.pdf", {
+                  type: "application/pdf",
+                }),
+              )
+            ).razaoSocialDetectada,
+        ),
+      );
+    },
+    [missingName, validName],
+  );
+  expect(names).toEqual([null, "EMPRESA FICTÍCIA LTDA"]);
+});
