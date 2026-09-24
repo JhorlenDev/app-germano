@@ -1,3 +1,5 @@
+> Registro da entrega anterior, antes do lote real. A validação e as correções atuais do leitor estão em [VALIDACAO_DOCUMENTOS_REAIS.md](VALIDACAO_DOCUMENTOS_REAIS.md).
+
 # HTML original com backend — validação de 24/09/2026
 
 Esta entrega substitui o modo estático padrão do commit e9ce86f. O requisito final é manter o original e executá-lo com backend, login e banco no servidor.

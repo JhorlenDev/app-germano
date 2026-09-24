@@ -1,5 +1,129 @@
-.server-session{max-width:1180px;margin:0 auto;padding:10px 24px 0;display:flex;align-items:center;justify-content:flex-end;gap:14px;font:12px system-ui;color:var(--ink-soft,#4b5f68)}
-.server-session a{color:inherit}.server-session button{border:0;border-radius:8px;padding:6px 12px;background:var(--petroleo-tint,#e4eef0);color:var(--petroleo,#0c4a5c);cursor:pointer;font:inherit}
-.login-page{margin:0;background:#f5f6f4;color:#182a32;font:15px/1.5 system-ui;min-height:100vh;display:grid;place-items:center;padding:20px;box-sizing:border-box}
-.login-card{width:100%;max-width:400px;padding:32px;box-sizing:border-box;background:white;border:1px solid #dde3e1;border-radius:14px;box-shadow:0 16px 40px #182a3210}.login-card h1{font:600 30px Georgia;margin:12px 0}.login-card p{color:#4b5f68}.login-card label{display:block;margin-top:16px}.login-card input{display:block;box-sizing:border-box;width:100%;padding:12px;margin-top:6px;border:1px solid #dde3e1;border-radius:8px;font:inherit}.login-card button{width:100%;padding:12px;background:#0c4a5c;color:white;border:0;border-radius:8px;font:600 15px system-ui;cursor:pointer}.login-card button:disabled{opacity:.6}#error{color:#a23b3b}
-@media print{.server-session{display:none}}
+.server-session {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 10px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  font: 12px system-ui;
+  color: var(--ink-soft, #4b5f68);
+}
+.server-session a {
+  color: inherit;
+}
+.server-session button {
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  background: var(--petroleo-tint, #e4eef0);
+  color: var(--petroleo, #0c4a5c);
+  cursor: pointer;
+  font: inherit;
+}
+.login-page {
+  margin: 0;
+  background: #f5f6f4;
+  color: #182a32;
+  font: 15px/1.5 system-ui;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 32px;
+  box-sizing: border-box;
+  background: white;
+  border: 1px solid #dde3e1;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px #182a3210;
+}
+.login-card h1 {
+  font: 600 30px Georgia;
+  margin: 12px 0;
+}
+.login-card p {
+  color: #4b5f68;
+}
+.login-card label {
+  display: block;
+  margin-top: 16px;
+}
+.login-card input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border: 1px solid #dde3e1;
+  border-radius: 8px;
+  font: inherit;
+}
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  background: #0c4a5c;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  font: 600 15px system-ui;
+  cursor: pointer;
+}
+.login-card button:disabled {
+  opacity: 0.6;
+}
+#error {
+  color: #a23b3b;
+}
+@media print {
+  .server-session {
+    display: none;
+  }
+}
+/* Print only the active report in normal document flow. A fixed modal repeats
+   its first viewport on every PDF page and clips the conclusion. */
+@media print {
+  html,
+  body,
+  #root,
+  #root > div {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  #root > div > * {
+    display: none !important;
+  }
+  #root > div > div:has(#parecer-print),
+  #root > div > div:has(#memorial-print),
+  #root > div > div:has(#ncm-print) {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    overflow: visible !important;
+    height: auto !important;
+    background: none !important;
+  }
+  #parecer-print,
+  #memorial-print,
+  #ncm-print {
+    position: static !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  #parecer-print h2,
+  #memorial-print h2,
+  #ncm-print h2 {
+    break-after: avoid;
+  }
+}

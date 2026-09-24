@@ -23,7 +23,10 @@
     "test:original:ui": "node tests/original-ui.mjs",
     "dev:original:estatico": "node --watch scripts/serve-original.mjs",
     "user:create:container": "tsx server/create-user.ts",
-    "test:original:backend": "node tests/original-backend.mjs"
+    "test:original:backend": "node tests/original-backend.mjs",
+    "test:original:import": "node --test tests/original-import.test.mjs",
+    "test:original:real": "python3 tests/audit-corpus.py && node tests/original-real-documents.mjs",
+    "test:original:production": "node tests/original-production.mjs"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.3.0",
@@ -31,6 +34,7 @@
     "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
+    "fflate": "^0.8.3",
     "helmet": "^8.3.0",
     "lucide-react": "^1.47.0",
     "pdfjs-dist": "^6.3.289",
