@@ -124,7 +124,7 @@ Fontes consultadas na revisão:
 ```bash
 npm run typecheck
 npm test
-npm run build
+npm run build:moderno
 npm run test:e2e
 ```
 

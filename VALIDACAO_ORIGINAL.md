@@ -1,42 +1,45 @@
-# Execução do HTML original
+# HTML original com backend — validação de 24/09/2026
 
-Pedido confirmado: usar o HTML original, com visual e comportamento originais,
-conservando a versão moderna separadamente.
+Esta entrega substitui o modo estático padrão do commit e9ce86f. O requisito final é manter o original e executá-lo com backend, login e banco no servidor.
 
-## Entrega
+## Implementado
 
-- `npm run dev` / `npm start`: servidor da página original, porta padrão 5173.
-- `npm run build`: gera `dist-original/index.html` sem transformação e inclui
-  servidor Node para hospedagem como serviço.
-- Docker/Compose padrão: HTML original na porta interna 3001, publicada em
-  127.0.0.1:3087, sem exigir PostgreSQL ou variáveis de banco.
-- Versão moderna preservada em src/shared/server e no commit 1c85c18,
-  com README.moderno.md, Dockerfile.moderno, compose.moderno.yaml e scripts
-  dev:moderno/build:moderno/start:moderno.
-- O HTML original não recebeu alterações. Cadastros continuam no localStorage
-  do navegador quando executado fora do Claude. Nenhum dado PostgreSQL foi
-  apagado ou convertido.
+- HTML original preservado byte a byte no arquivo de referência.
+- Build com React 18 e CSS local; sem Babel ou Tailwind executados por CDN em produção. Fontes Google continuam externas, com fallback do próprio HTML.
+- Adaptação de persistência para API Express/PostgreSQL, com o payload original completo, resultados e seis competências.
+- Login por sessão, cookies HttpOnly/SameSite/Secure em produção, logout, verificação de origem e auditoria.
+- Carteira compartilhada entre usuários autenticados; controle de versão bloqueia sobrescrita de outra sessão.
+- Exemplos permanecem na interface, sem serem cadastrados automaticamente no banco.
+- Autosave com indicação de falha e sem fallback silencioso para localStorage; backup JSON e restauração.
+- Docker/Compose com PostgreSQL persistente e serviço `admin` para criar a primeira conta.
+- Design anterior e respectivas tabelas preservados; nenhuma migração automática dos cadastros entre formatos.
 
 ## Verificação executada
 
-- `npm run test:original`: 3 testes passaram (bytes idênticos, rotas restritas,
-  HEAD/health sem banco).
-- `npm run test:original:ui`: renderização, cadastro sintético, autosave local,
-  recarga e abertura do parecer passaram em navegador real; nenhum pageerror.
-  Viewports desktop e mobile foram usados, sem alterar o layout original.
-- `npm run build`: passou; `cmp` confirmou igualdade de index.html gerado com
-  o HTML original. `git diff --quiet HEAD -- diagnostico-tributario-2027-app.html`
-  confirmou ausência de alterações no arquivo de referência.
 - `npm run typecheck`: passou.
+- `npm run build`: passou.
+- `npm run build:moderno`: passou; aplicação anterior continua compilando.
+- `npm run test:original:backend`: passou com Chromium real e PostgreSQL local.
+  - Acesso anônimo bloqueado; login e logout funcionando.
+  - Upload de cartão CNPJ e PGDAS sintéticos em TXT, com preenchimento e autosave no banco.
+  - Identidade, RBT12 e competência persistidos; seis posições do histórico conservadas.
+  - Resultados dos três exemplos iguais aos obtidos do HTML original compilado separadamente.
+  - Cadastro aberto em outro contexto de navegador sem localStorage compartilhado.
+  - Conflito entre duas sessões bloqueado, sem sobrescrever a primeira alteração.
+  - Falha de rede simulada: aviso de não salvamento e ausência de cadastro no localStorage.
+  - Origem indevida bloqueada e payload com CNPJ divergente rejeitado.
+  - Parecer aberto; backup exportado, restaurado e confirmado após recarga; exclusão confirmada no banco.
+  - Interface aberta em viewport móvel; sem erros JavaScript não tratados.
 - `docker build -t gm-tributario-original:local .`: passou.
-- Container executado com usuário node: resposta HTTP igual aos bytes do HTML
-  original e health 200. Container temporário encerrado após a verificação.
-- `docker compose config --quiet` e `git diff --check`: passaram.
+- `node tests/original-production.mjs`: a mesma integração passou contra o container com usuário `node`, NODE_ENV=production, PostgreSQL e proxy HTTPS local. Container temporário removido ao final.
+- Compose validado com `docker compose config --quiet` usando valores fictícios de configuração.
+- `git diff --exit-code -- diagnostico-tributario-2027-app.html`: referência sem alterações.
+- Cadastros fictícios removidos após os testes; nenhum cadastro real removido.
 
-Primeiros testes do container detectaram permissões herdadas do HTML (0600)
-e diretório scripts sem execução. Dockerfile corrigido com permissões explícitas;
-a verificação final acima passou.
+## Limites desta validação
 
-O servidor original está disponível localmente em http://localhost:5173.
-Nenhum deploy foi executado em servidor remoto nesta rodada.
-As dependências externas e limitações funcionais são as do HTML original.
+Não é uma revisão da legislação nem das fórmulas. Os cálculos e leitores de documentos mantêm o comportamento do HTML, inclusive suas limitações. Não foi validada a extração de todos os tipos de PDF, nem implementado OCR. Os arquivos brutos não são arquivados: são persistidos os dados extraídos e os diagnósticos.
+
+A suíte antiga da versão moderna não foi reexecutada integralmente nesta entrega; suas falhas já registradas não foram alteradas. Os testes estáticos `test:original` e `test:original:ui` são da referência sem backend, não demonstram a persistência no servidor.
+
+Execução local disponível em http://localhost:5173. Nenhum deploy em servidor remoto foi realizado: o pacote e o procedimento estão prontos no README, mas faltam os dados de acesso/domínio do servidor de destino.

@@ -1,15 +1,60 @@
 name: gm-tributario
 services:
-  app:
-    build: .
+  db:
+    image: postgres:16-alpine
     restart: unless-stopped
     environment:
+      POSTGRES_DB: diagnostico
+      POSTGRES_USER: diagnostico
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U diagnostico -d diagnostico]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://diagnostico:${POSTGRES_PASSWORD}@db:5432/diagnostico
+      APP_ORIGIN: ${APP_ORIGIN:?Defina o domínio HTTPS}
+      TRUST_PROXY: "1"
       HOST: 0.0.0.0
       PORT: 3001
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "127.0.0.1:3087:3001"
     healthcheck:
-      test: [CMD, node, -e, "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
+  admin:
+    profiles: [tools]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [npm, run, user:create:container]
+    environment:
+      DATABASE_URL: postgresql://diagnostico:${POSTGRES_PASSWORD}@db:5432/diagnostico
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  postgres_data:

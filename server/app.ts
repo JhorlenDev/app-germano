@@ -13,7 +13,9 @@ import { pool } from "./db.js";
 import { digest, hashPassword, verifyPassword } from "./auth.js";
 import { stateSchema } from "../shared/schema.js";
 import { computeRegimes, ENGINE_VERSION } from "../shared/engine.js";
+import { originalRouter } from "./original.js";
 export const app = express();
+const original = process.env.UI_VARIANT !== "moderno";
 const production = process.env.NODE_ENV === "production";
 if (production && !process.env.APP_ORIGIN?.startsWith("https://"))
   throw new Error("APP_ORIGIN precisa ser HTTPS em produção.");
@@ -26,8 +28,8 @@ app.use(
           directives: {
             "script-src": ["'self'"],
             "worker-src": ["'self'", "blob:"],
-            "style-src": ["'self'", "'unsafe-inline'"],
-            "font-src": ["'self'"],
+            "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            "font-src": ["'self'", "https://fonts.gstatic.com"],
             "img-src": ["'self'", "data:"],
             "connect-src": ["'self'"],
             "frame-ancestors": ["'none'"],
@@ -289,11 +291,24 @@ app.post("/api/backup", async (req, res) => {
     client.release();
   }
 });
+app.use("/api/original", originalRouter);
 app.use("/api", (_req, res) =>
   res.status(404).json({ error: "Rota não encontrada." }),
 );
-app.use(express.static(resolve("dist"), { index: false }));
-app.get("/{*path}", (_req, res) => res.sendFile(resolve("dist/index.html")));
+if (original) {
+  app.use('/assets', express.static(resolve('dist-original/assets'), { index: false }));
+  app.get('/login', (_req, res) => { res.set('Cache-Control', 'no-store'); res.sendFile(resolve('dist-original/login.html')); });
+  app.get(['/', '/index.html', '/diagnostico-tributario-2027-app.html'], async (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    const { rows } = await pool.query('SELECT 1 FROM sessions WHERE token_hash=$1 AND expires_at>now()', [digest(req.cookies.gm_session || '')]);
+    if (!rows.length) { res.redirect('/login'); return; }
+    res.sendFile(resolve('dist-original/index.html'));
+  });
+  app.use((_req, res) => { res.status(404).send('Página não encontrada.'); });
+} else {
+  app.use(express.static(resolve("dist"), { index: false }));
+  app.get("/{*path}", (_req, res) => res.sendFile(resolve("dist/index.html")));
+}
 app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
   if (error instanceof z.ZodError) {
     res.status(400).json({
