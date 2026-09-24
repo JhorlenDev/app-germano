@@ -7,14 +7,20 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "dev": "concurrently -k \"tsx watch --env-file=.env server/index.ts\" \"vite --host 0.0.0.0\"",
-    "build": "vite build",
-    "start": "tsx --env-file=.env server/index.ts",
-    "start:container": "tsx server/index.ts",
+    "dev": "node --watch scripts/serve-original.mjs",
+    "build": "node scripts/build-original.mjs",
+    "start": "node scripts/serve-original.mjs",
+    "start:container": "node scripts/serve-original.mjs",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
-    "user:create": "tsx --env-file=.env server/create-user.ts"
+    "user:create": "tsx --env-file=.env server/create-user.ts",
+    "dev:moderno": "concurrently -k \"tsx watch --env-file=.env server/index.ts\" \"vite --host 0.0.0.0\"",
+    "build:moderno": "vite build",
+    "start:moderno": "tsx --env-file=.env server/index.ts",
+    "start:container:moderno": "tsx server/index.ts",
+    "test:original": "node --test tests/original-server.test.mjs",
+    "test:original:ui": "node tests/original-ui.mjs"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.3.0",
