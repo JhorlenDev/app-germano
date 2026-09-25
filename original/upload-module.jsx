@@ -188,7 +188,7 @@ function UploadModule({ setor, d, onApply, onLoadExample }) {
         rbt12: agg.rbt12 || 0,
         comprasMensais: agg.comprasEntrada,
         pctFornecedorRegimeNormal: agg.comprasEntrada
-          ? Math.round((100 * agg.comprasComCredito) / agg.comprasEntrada)
+          ? (100 * agg.comprasComCredito) / agg.comprasEntrada
           : 0,
         pctB2B:
           agg.vendasB2B + agg.vendasB2C
@@ -230,6 +230,8 @@ function UploadModule({ setor, d, onApply, onLoadExample }) {
         return {
           faturamento: m.faturamentoSaida,
           comprasRegimeNormal: m.comprasComCredito,
+          comprasOutras: Math.max(0, m.comprasEntrada - m.comprasComCredito),
+          proLabore: m.proLabore,
           folha: m.folha + m.proLabore,
         };
       });

@@ -36,6 +36,16 @@ jsx =
   (await readFile("original/upload-module.jsx", "utf8")) +
   jsx.slice(uploadEnd);
 
+// Keep the reference HTML intact; use one calculation engine in the running app.
+patch("function computeRegimes(d) {", "function computeRegimesOriginal(d) {");
+const monthStart = jsx.indexOf("function computeMesRegimes(d, mes) {");
+const monthEnd = jsx.indexOf("/* ============================= EXEMPLOS", monthStart);
+if (monthStart < 0 || monthEnd < 0) throw new Error("Cálculo mensal não encontrado");
+jsx = jsx.slice(0, monthStart) + await readFile("original/month-calculation.js", "utf8") + "\n" + jsx.slice(monthEnd);
+
+patch("fmtBRL2(d.comprasMensais * d.pctFornecedorRegimeNormal / 100)", "fmtBRL2(calc.cbsCredito / CBS_ALIQ)");
+patch("{d.pctFornecedorRegimeNormal}%</span>", "{fmtPct(preciseSimulationData(d).pctFornecedorRegimeNormal / 100)}</span>");
+
 jsx = jsx.replaceAll("window.claude", "window.gmServices");
 jsx = jsx.replaceAll("setDbStatus('unavailable')", "setDbStatus('error')");
 patch(

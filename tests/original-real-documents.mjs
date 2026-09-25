@@ -249,6 +249,17 @@ try {
       assert.equal(row.data.d.folhaMensal, 0);
       assert.equal(row.data.d.proLabore, 0);
     }
+    const differences = await page.evaluate((data) => {
+      const card = computeRegimes(data);
+      const a = window.gmImport.aggregate(data.documentosImportados, data.competenciaImportacao, aggregateFiles);
+      const month = { faturamento: data.faturamentoMensal, comprasRegimeNormal: a.comprasComCredito,
+        comprasOutras: a.comprasEntrada - a.comprasComCredito, folha: a.folha + a.proLabore, proLabore: a.proLabore };
+      data.historico = [month];
+      data.historicoCompetencias = [data.competenciaImportacao];
+      const table = computeMesRegimes(data, month);
+      return ['tradicional', 'hibrido', 'presumido'].map(k => Math.abs(card.regimes[k].mensal - table[k]));
+    }, row.data.d);
+    assert.ok(differences.every(x => x < 0.005), `Tabela e cards devem coincidir em ${period}`);
     monthly[period] = {
       revenue: row.data.d.faturamentoMensal,
       rbt12: row.data.d.rbt12,

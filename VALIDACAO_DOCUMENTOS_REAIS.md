@@ -67,3 +67,11 @@ npm run test:original:real
 ```
 
 O teste real exige a pasta privada `Documentos Germano`, `pdftotext`, Python, PostgreSQL e Chromium. Relatórios detalhados e imagens ficam em `test-results/real-documents`, ignorado pelo Git. A pasta dos documentos também foi excluída do Git e do contexto Docker. O teste cria e remove seu próprio banco; não substitui nem apaga clientes do banco de uso.
+
+### Correção posterior: tabela e cards
+
+A fidelidade ao HTML original não garantia equivalência entre suas duas funções de cálculo. A aplicação agora usa `computeRegimesOriginal` como motor único: a tabela considera compras totais para a base de ICMS usada pelo simulador principal, crédito de CBS sem arredondamento do percentual e salário/pró-labore separados. Isso alinha as premissas internas; não constitui revisão legal dessas premissas.
+
+Os documentos dos registros antigos recuperam as parcelas ausentes sem exigir reenvio. Sem documentos ou campos separados, históricos antigos mantêm compras informadas como compras totais e folha informada como salário; não é possível inferir parcelas desconhecidas. Alterações manuais no percentual diferentes do valor importado são preservadas.
+
+Regressão: `npm run build && node --test tests/original-month-calculation.test.mjs`. O teste real também compara os três regimes da tabela com os cards em cada competência importada.
